@@ -1,0 +1,16 @@
+overwrite: true
+schema: "./graphql/schema.graphql"
+documents: "./src/**/*.ts"
+generates:
+  src/common/graphql-sdk.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-graphql-request
+    config:
+      strictScalars: true
+      scalars:
+        uuid: string
+hooks:
+  afterAllFileWrite:
+    - eslint src/common/graphql-sdk.ts --fix
