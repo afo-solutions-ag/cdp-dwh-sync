@@ -6,12 +6,17 @@ import {
   DeleteUserPayloadDto,
   InsertUserPayloadDto,
   UpdateUserPayloadDto,
-} from './trigger-hook.dtos/user.dto';
+} from './trigger-hook.dtos';
 import { TriggerHookService } from './trigger-hook.service';
+
+type Response = {
+  entity: string;
+  action: 'insert' | 'update' | 'delete';
+};
 
 @Controller('/trigger-hook')
 export class TriggerHookController {
-  constructor(private triggerHookService: TriggerHookService) {}
+  constructor(private readonly triggerHookService: TriggerHookService) {}
 
   @Get()
   is_up(): { is_up: boolean } {
@@ -19,16 +24,14 @@ export class TriggerHookController {
   }
 
   @Post('/user')
-  async triggerHook(
-    @Body() body: GenericPayloadDto,
-  ): Promise<{ success: boolean }> {
+  async triggerHook(@Body() body: GenericPayloadDto): Promise<Response> {
     const insertUserPayload = plainToClass(InsertUserPayloadDto, body);
     const insertErrors = await validate(insertUserPayload);
     if (insertErrors.length === 0) {
       await this.triggerHookService.createUser(
         insertUserPayload.event.data.new,
       );
-      return { success: true };
+      return { entity: 'user', action: 'insert' };
     }
 
     const updateUserPayload = plainToClass(UpdateUserPayloadDto, body);
@@ -38,7 +41,7 @@ export class TriggerHookController {
         updateUserPayload.event.data.old,
         updateUserPayload.event.data.new,
       );
-      return { success: true };
+      return { entity: 'user', action: 'update' };
     }
 
     const deleteUserPayload = plainToClass(DeleteUserPayloadDto, body);
@@ -47,7 +50,7 @@ export class TriggerHookController {
       await this.triggerHookService.deleteUser(
         deleteUserPayload.event.data.old,
       );
-      return { success: true };
+      return { entity: 'user', action: 'delete' };
     }
 
     throw Error('Invalid payload received');
