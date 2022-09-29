@@ -1,7 +1,18 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, Post } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
-import { GenericPayloadDto } from './trigger-hook.dtos';
+import {
+  DeleteDWHConnectionPayloadDto,
+  DeleteSystemPayloadDto,
+  DeleteUnitPayloadDto,
+  GenericPayloadDto,
+  InsertDWHConnectionPayloadDto,
+  InsertSystemPayloadDto,
+  InsertUnitPayloadDto,
+  UpdateDWHConnectionPayloadDto,
+  UpdateSystemPayloadDto,
+  UpdateUnitPayloadDto,
+} from './trigger-hook.dtos';
 import {
   DeleteUserPayloadDto,
   InsertUserPayloadDto,
@@ -24,7 +35,7 @@ export class TriggerHookController {
   }
 
   @Post('/user')
-  async triggerHook(@Body() body: GenericPayloadDto): Promise<Response> {
+  async triggerHookUser(@Body() body: GenericPayloadDto): Promise<Response> {
     const insertUserPayload = plainToClass(InsertUserPayloadDto, body);
     const insertErrors = await validate(insertUserPayload);
     if (insertErrors.length === 0) {
@@ -53,7 +64,149 @@ export class TriggerHookController {
       return { entity: 'user', action: 'delete' };
     }
 
-    throw Error('Invalid payload received');
+    throw new HttpException(
+      {
+        message: 'Invalid payload received',
+        insertErrors,
+        updateErrors,
+        deleteErrors,
+      },
+      422,
+    );
+  }
+
+  @Post('/unit')
+  async triggerHookUnit(@Body() body: GenericPayloadDto): Promise<Response> {
+    const insertUnitPayload = plainToClass(InsertUnitPayloadDto, body);
+    const insertErrors = await validate(insertUnitPayload);
+    if (insertErrors.length === 0) {
+      await this.triggerHookService.createUnit(
+        insertUnitPayload.event.data.new,
+      );
+      return { entity: 'unit', action: 'insert' };
+    }
+
+    const updateUnitPayload = plainToClass(UpdateUnitPayloadDto, body);
+    const updateErrors = await validate(updateUnitPayload);
+    if (updateErrors.length === 0) {
+      await this.triggerHookService.updateUnit(
+        updateUnitPayload.event.data.old,
+        updateUnitPayload.event.data.new,
+      );
+      return { entity: 'unit', action: 'update' };
+    }
+
+    const deleteUnitPayload = plainToClass(DeleteUnitPayloadDto, body);
+    const deleteErrors = await validate(deleteUnitPayload, {});
+    if (deleteErrors.length === 0) {
+      await this.triggerHookService.deleteUnit(
+        deleteUnitPayload.event.data.old,
+      );
+      return { entity: 'unit', action: 'delete' };
+    }
+
+    throw new HttpException(
+      {
+        message: 'Invalid payload received',
+        insertErrors,
+        updateErrors,
+        deleteErrors,
+      },
+      422,
+    );
+  }
+
+  @Post('/system')
+  async triggerHookSystem(@Body() body: GenericPayloadDto): Promise<Response> {
+    const insertSystemPayload = plainToClass(InsertSystemPayloadDto, body);
+    const insertErrors = await validate(insertSystemPayload);
+    if (insertErrors.length === 0) {
+      await this.triggerHookService.createSystem(
+        insertSystemPayload.event.data.new,
+      );
+      return { entity: 'system', action: 'insert' };
+    }
+
+    const updateSystemPayload = plainToClass(UpdateSystemPayloadDto, body);
+    const updateErrors = await validate(updateSystemPayload);
+    if (updateErrors.length === 0) {
+      await this.triggerHookService.updateSystem(
+        updateSystemPayload.event.data.old,
+        updateSystemPayload.event.data.new,
+      );
+      return { entity: 'system', action: 'update' };
+    }
+
+    const deleteSystemPayload = plainToClass(DeleteSystemPayloadDto, body);
+    const deleteErrors = await validate(deleteSystemPayload, {});
+    if (deleteErrors.length === 0) {
+      await this.triggerHookService.deleteSystem(
+        deleteSystemPayload.event.data.old,
+      );
+      return { entity: 'system', action: 'delete' };
+    }
+
+    throw new HttpException(
+      {
+        message: 'Invalid payload received',
+        insertErrors,
+        updateErrors,
+        deleteErrors,
+      },
+      422,
+    );
+  }
+
+  @Post('/dwh-connection')
+  async triggerHookDwhConnection(
+    @Body() body: GenericPayloadDto,
+  ): Promise<Response> {
+    const insertDWHConnectionPayload = plainToClass(
+      InsertDWHConnectionPayloadDto,
+      body,
+    );
+    const insertErrors = await validate(insertDWHConnectionPayload);
+    if (insertErrors.length === 0) {
+      await this.triggerHookService.createDWHConnection(
+        insertDWHConnectionPayload.event.data.new,
+      );
+      return { entity: 'dwh-connection', action: 'insert' };
+    }
+
+    const updateDWHConnectionPayload = plainToClass(
+      UpdateDWHConnectionPayloadDto,
+      body,
+    );
+    const updateErrors = await validate(updateDWHConnectionPayload);
+    if (updateErrors.length === 0) {
+      await this.triggerHookService.updateDWHConnection(
+        updateDWHConnectionPayload.event.data.old,
+        updateDWHConnectionPayload.event.data.new,
+      );
+      return { entity: 'dwh-connection', action: 'update' };
+    }
+
+    const deleteDWHConnectionPayload = plainToClass(
+      DeleteDWHConnectionPayloadDto,
+      body,
+    );
+    const deleteErrors = await validate(deleteDWHConnectionPayload, {});
+    if (deleteErrors.length === 0) {
+      await this.triggerHookService.deleteDWHConnection(
+        deleteDWHConnectionPayload.event.data.old,
+      );
+      return { entity: 'dwh-connection', action: 'delete' };
+    }
+
+    throw new HttpException(
+      {
+        message: 'Invalid payload received',
+        insertErrors,
+        updateErrors,
+        deleteErrors,
+      },
+      422,
+    );
   }
 }
 
