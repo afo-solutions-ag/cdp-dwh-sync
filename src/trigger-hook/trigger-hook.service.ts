@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { GraphQLService } from 'src/graphql/graphql.service';
 import { SQSService } from 'src/sqs/sqs.service';
 import {
   RedshiftConfigurationDto,
@@ -37,7 +38,10 @@ const tidyUpRedshiftConfiguration = (
 
 @Injectable()
 export class TriggerHookService {
-  constructor(private readonly sqsService: SQSService) {}
+  constructor(
+    private readonly sqsService: SQSService,
+    private readonly graphQLService: GraphQLService,
+  ) {}
 
   async createUser(newUser: UserDto) {
     newUser = tidyUpUser(newUser);
@@ -54,17 +58,28 @@ export class TriggerHookService {
       JSON.stringify(oldUser, null, 2),
       JSON.stringify(newUser, null, 2),
     );
+    const oldSystemIds = await this.graphQLService.getUserSystemIds(oldUser.id);
+    const newSystemIds = await this.graphQLService.getUserSystemIds(newUser.id);
+    const systemIds = Array.from(new Set([...oldSystemIds, ...newSystemIds]));
 
-    // TODO get respective system ids
-    // old.unit_access.unit.system_id + new.unit_access.unit.system_id
-    // TODO send messages with system ids
+    await Promise.all(
+      systemIds.map(async (systemId) => {
+        await this.sqsService.sendMessage({ systemId }, 'USER');
+      }),
+    );
   }
 
   async deleteUser(oldUser: UserDto) {
     oldUser = tidyUpUser(oldUser);
 
-    // TODO get all system
-    // TODO send messages with system ids
+    console.log('Delete user triggered with', JSON.stringify(oldUser, null, 2));
+    const systemIds = await this.graphQLService.getSystemIds();
+
+    await Promise.all(
+      systemIds.map(async (systemId) => {
+        await this.sqsService.sendMessage({ systemId }, 'USER');
+      }),
+    );
   }
 
   async createUnit(newUnit: UnitDto) {
