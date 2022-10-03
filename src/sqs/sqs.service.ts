@@ -3,12 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SQSConfig } from './sqs.config';
 
-type Entity = 'USER' | 'UNIT' | 'SYSTEM' | 'DWH_CONNECTION';
-type Event = 'CREATE' | 'UPDATE' | 'DELETE';
-
-type CreateMessage<T = object> = { new: T };
-type UpdateMessage<T = object> = { old: T; new: T };
-type DeleteMessage<T = object> = { old: T };
+type Entity = 'USER' | 'UNIT' | 'SYSTEM' | 'REDSHIFT_CONFIGURATION';
+type MessageBody = { systemId: string };
 
 @Injectable()
 export class SQSService {
@@ -28,7 +24,7 @@ export class SQSService {
     this.queueUrl = configService.getOrThrow<string>('QUEUE_URL');
   }
 
-  private async sendMessage(message: object, entity: Entity, eventType: Event) {
+  async sendMessage(message: MessageBody, entity: Entity) {
     const messageJson = JSON.stringify(message);
 
     return await this.client.send(
@@ -37,21 +33,8 @@ export class SQSService {
         MessageBody: messageJson,
         MessageAttributes: {
           Entity: { DataType: 'String', StringValue: entity },
-          EventType: { DataType: 'String', StringValue: eventType },
         },
       }),
     );
-  }
-
-  async sendCreateMessage(message: CreateMessage, entity: Entity) {
-    return await this.sendMessage(message, entity, 'CREATE');
-  }
-
-  async sendUpdateMessage(message: UpdateMessage, entity: Entity) {
-    return await this.sendMessage(message, entity, 'UPDATE');
-  }
-
-  async sendDeleteMessage(message: DeleteMessage, entity: Entity) {
-    return await this.sendMessage(message, entity, 'DELETE');
   }
 }

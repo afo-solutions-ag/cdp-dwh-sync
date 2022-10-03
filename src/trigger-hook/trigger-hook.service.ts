@@ -7,10 +7,6 @@ import {
   UserDto,
 } from './trigger-hook.dtos';
 
-type CreateMessage<T = object> = { new: T };
-type UpdateMessage<T = object> = { old: T; new: T };
-type DeleteMessage<T = object> = { old: T };
-
 const tidyUpUser = (user: UserDto): UserDto => ({
   id: user.id,
   email: user.email,
@@ -44,89 +40,162 @@ export class TriggerHookService {
   constructor(private readonly sqsService: SQSService) {}
 
   async createUser(newUser: UserDto) {
-    const message: CreateMessage<UserDto> = { new: tidyUpUser(newUser) };
-    await this.sqsService.sendCreateMessage(message, 'USER');
+    newUser = tidyUpUser(newUser);
+
+    console.log('Create user triggered with', JSON.stringify(newUser, null, 2));
   }
 
   async updateUser(oldUser: UserDto, newUser: UserDto) {
-    const message: UpdateMessage<UserDto> = {
-      old: tidyUpUser(oldUser),
-      new: tidyUpUser(newUser),
-    };
-    await this.sqsService.sendUpdateMessage(message, 'USER');
+    oldUser = tidyUpUser(oldUser);
+    newUser = tidyUpUser(newUser);
+
+    console.log(
+      'Update user triggered with',
+      JSON.stringify(oldUser, null, 2),
+      JSON.stringify(newUser, null, 2),
+    );
+
+    // TODO get respective system ids
+    // old.unit_access.unit.system_id + new.unit_access.unit.system_id
+    // TODO send messages with system ids
   }
 
   async deleteUser(oldUser: UserDto) {
-    const message: DeleteMessage<UserDto> = { old: tidyUpUser(oldUser) };
-    await this.sqsService.sendDeleteMessage(message, 'USER');
+    oldUser = tidyUpUser(oldUser);
+
+    // TODO get all system
+    // TODO send messages with system ids
   }
 
   async createUnit(newUnit: UnitDto) {
-    const message: CreateMessage<UnitDto> = { new: tidyUpUnit(newUnit) };
-    await this.sqsService.sendCreateMessage(message, 'UNIT');
+    newUnit = tidyUpUnit(newUnit);
+
+    console.log('Create unit triggered with', JSON.stringify(newUnit, null, 2));
+    await this.sqsService.sendMessage({ systemId: newUnit.system_id }, 'UNIT');
   }
 
   async updateUnit(oldUnit: UnitDto, newUnit: UnitDto) {
-    const message: UpdateMessage<UnitDto> = {
-      old: tidyUpUnit(oldUnit),
-      new: tidyUpUnit(newUnit),
-    };
-    await this.sqsService.sendUpdateMessage(message, 'UNIT');
+    oldUnit = tidyUpUnit(oldUnit);
+    newUnit = tidyUpUnit(newUnit);
+
+    console.log(
+      'Update unit triggered with',
+      JSON.stringify(oldUnit, null, 2),
+      JSON.stringify(newUnit, null, 2),
+    );
+    const oldSystemId = oldUnit.system_id;
+    const newSystemId = newUnit.system_id;
+    await this.sqsService.sendMessage({ systemId: oldSystemId }, 'UNIT');
+    if (oldSystemId !== newSystemId) {
+      await this.sqsService.sendMessage({ systemId: newSystemId }, 'UNIT');
+    }
   }
 
   async deleteUnit(oldUnit: UnitDto) {
-    const message: DeleteMessage<UnitDto> = { old: tidyUpUnit(oldUnit) };
-    await this.sqsService.sendDeleteMessage(message, 'UNIT');
+    oldUnit = tidyUpUnit(oldUnit);
+
+    console.log('Delete unit triggered with', JSON.stringify(oldUnit, null, 2));
+    await this.sqsService.sendMessage({ systemId: oldUnit.system_id }, 'UNIT');
   }
 
   async createSystem(newSystem: SystemDto) {
-    const message: CreateMessage<SystemDto> = {
-      new: tidyUpSystem(newSystem),
-    };
-    await this.sqsService.sendCreateMessage(message, 'SYSTEM');
+    newSystem = tidyUpSystem(newSystem);
+
+    console.log(
+      'Create system triggered with',
+      JSON.stringify(newSystem, null, 2),
+    );
+    await this.sqsService.sendMessage({ systemId: newSystem.id }, 'SYSTEM');
   }
 
   async updateSystem(oldSystem: SystemDto, newSystem: SystemDto) {
-    const message: UpdateMessage<SystemDto> = {
-      old: tidyUpSystem(oldSystem),
-      new: tidyUpSystem(newSystem),
-    };
-    await this.sqsService.sendUpdateMessage(message, 'SYSTEM');
+    oldSystem = tidyUpSystem(oldSystem);
+    newSystem = tidyUpSystem(newSystem);
+
+    console.log(
+      'Update system triggered with',
+      JSON.stringify(oldSystem, null, 2),
+      JSON.stringify(newSystem, null, 2),
+    );
+    const oldSystemId = oldSystem.id;
+    const newSystemId = newSystem.id;
+    await this.sqsService.sendMessage({ systemId: oldSystemId }, 'SYSTEM');
+    if (oldSystemId !== newSystemId) {
+      await this.sqsService.sendMessage({ systemId: newSystemId }, 'SYSTEM');
+    }
   }
 
   async deleteSystem(oldSystem: SystemDto) {
-    const message: DeleteMessage<SystemDto> = {
-      old: tidyUpSystem(oldSystem),
-    };
-    await this.sqsService.sendDeleteMessage(message, 'SYSTEM');
+    oldSystem = tidyUpSystem(oldSystem);
+
+    console.log(
+      'Delete system triggered with',
+      JSON.stringify(oldSystem, null, 2),
+    );
+    await this.sqsService.sendMessage({ systemId: oldSystem.id }, 'SYSTEM');
   }
 
   async createRedshiftConfiguration(
     newRedshiftConfiguration: RedshiftConfigurationDto,
   ) {
-    const message: CreateMessage<RedshiftConfigurationDto> = {
-      new: tidyUpRedshiftConfiguration(newRedshiftConfiguration),
-    };
-    await this.sqsService.sendCreateMessage(message, 'DWH_CONNECTION');
+    newRedshiftConfiguration = tidyUpRedshiftConfiguration(
+      newRedshiftConfiguration,
+    );
+
+    console.log(
+      'Create redshift configuration triggered with',
+      JSON.stringify(newRedshiftConfiguration, null, 2),
+    );
+    await this.sqsService.sendMessage(
+      { systemId: newRedshiftConfiguration.system_id },
+      'REDSHIFT_CONFIGURATION',
+    );
   }
 
   async updateRedshiftConfiguration(
     oldRedshiftConfiguration: RedshiftConfigurationDto,
     newRedshiftConfiguration: RedshiftConfigurationDto,
   ) {
-    const message: UpdateMessage<RedshiftConfigurationDto> = {
-      old: tidyUpRedshiftConfiguration(oldRedshiftConfiguration),
-      new: tidyUpRedshiftConfiguration(newRedshiftConfiguration),
-    };
-    await this.sqsService.sendUpdateMessage(message, 'DWH_CONNECTION');
+    oldRedshiftConfiguration = tidyUpRedshiftConfiguration(
+      oldRedshiftConfiguration,
+    );
+    newRedshiftConfiguration = tidyUpRedshiftConfiguration(
+      newRedshiftConfiguration,
+    );
+
+    console.log(
+      'Update redshift configuration triggered with',
+      JSON.stringify(oldRedshiftConfiguration, null, 2),
+      JSON.stringify(newRedshiftConfiguration, null, 2),
+    );
+    const oldSystemId = oldRedshiftConfiguration.system_id;
+    const newSystemId = newRedshiftConfiguration.system_id;
+    await this.sqsService.sendMessage(
+      { systemId: oldSystemId },
+      'REDSHIFT_CONFIGURATION',
+    );
+    if (oldSystemId !== newSystemId) {
+      await this.sqsService.sendMessage(
+        { systemId: newSystemId },
+        'REDSHIFT_CONFIGURATION',
+      );
+    }
   }
 
   async deleteRedshiftConfiguration(
     oldRedshiftConfiguration: RedshiftConfigurationDto,
   ) {
-    const message: DeleteMessage<RedshiftConfigurationDto> = {
-      old: tidyUpRedshiftConfiguration(oldRedshiftConfiguration),
-    };
-    await this.sqsService.sendDeleteMessage(message, 'DWH_CONNECTION');
+    oldRedshiftConfiguration = tidyUpRedshiftConfiguration(
+      oldRedshiftConfiguration,
+    );
+
+    console.log(
+      'Delete redshift configuration triggered with',
+      JSON.stringify(oldRedshiftConfiguration, null, 2),
+    );
+    await this.sqsService.sendMessage(
+      { systemId: oldRedshiftConfiguration.system_id },
+      'REDSHIFT_CONFIGURATION',
+    );
   }
 }
