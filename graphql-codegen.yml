@@ -2,7 +2,7 @@ overwrite: true
 schema: "./graphql/schema.graphql"
 documents: "./src/**/*.ts"
 generates:
-  src/common/graphql-sdk.ts:
+  src/graphql/graphql.sdk.ts:
     plugins:
       - typescript
       - typescript-operations
@@ -13,4 +13,4 @@ generates:
         uuid: string
 hooks:
   afterAllFileWrite:
-    - eslint src/common/graphql-sdk.ts --fix
+    - eslint src/graphql/graphql.sdk.ts --fix
