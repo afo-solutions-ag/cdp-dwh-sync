@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { SQSService } from 'src/sqs/sqs.service';
-import { DWHConnectionDto, SystemDto, UnitDto, UserDto } from './trigger-hook.dtos';
+import {
+  RedshiftConfigurationDto,
+  SystemDto,
+  UnitDto,
+  UserDto,
+} from './trigger-hook.dtos';
 
 type CreateMessage<T = object> = { new: T };
 type UpdateMessage<T = object> = { old: T; new: T };
@@ -24,14 +29,14 @@ const tidyUpSystem = (system: SystemDto): SystemDto => ({
   name: system.name,
 });
 
-const tidyUpDWHConnection = (
-  dwhConnection: DWHConnectionDto,
-): DWHConnectionDto => ({
-  id: dwhConnection.id,
-  host: dwhConnection.host,
-  database: dwhConnection.database,
-  user: dwhConnection.user,
-  system_id: dwhConnection.system_id,
+const tidyUpRedshiftConfiguration = (
+  redshiftConfiguration: RedshiftConfigurationDto,
+): RedshiftConfigurationDto => ({
+  id: redshiftConfiguration.id,
+  host: redshiftConfiguration.host,
+  database: redshiftConfiguration.database,
+  user: redshiftConfiguration.user,
+  system_id: redshiftConfiguration.system_id,
 });
 
 @Injectable()
@@ -40,7 +45,7 @@ export class TriggerHookService {
 
   async createUser(newUser: UserDto) {
     const message: CreateMessage<UserDto> = { new: tidyUpUser(newUser) };
-    await this.sqsService.sendCreateMessage(message, 'user');
+    await this.sqsService.sendCreateMessage(message, 'USER');
   }
 
   async updateUser(oldUser: UserDto, newUser: UserDto) {
@@ -48,17 +53,17 @@ export class TriggerHookService {
       old: tidyUpUser(oldUser),
       new: tidyUpUser(newUser),
     };
-    await this.sqsService.sendUpdateMessage(message, 'user');
+    await this.sqsService.sendUpdateMessage(message, 'USER');
   }
 
   async deleteUser(oldUser: UserDto) {
     const message: DeleteMessage<UserDto> = { old: tidyUpUser(oldUser) };
-    await this.sqsService.sendDeleteMessage(message, 'user');
+    await this.sqsService.sendDeleteMessage(message, 'USER');
   }
 
   async createUnit(newUnit: UnitDto) {
     const message: CreateMessage<UnitDto> = { new: tidyUpUnit(newUnit) };
-    await this.sqsService.sendCreateMessage(message, 'unit');
+    await this.sqsService.sendCreateMessage(message, 'UNIT');
   }
 
   async updateUnit(oldUnit: UnitDto, newUnit: UnitDto) {
@@ -66,19 +71,19 @@ export class TriggerHookService {
       old: tidyUpUnit(oldUnit),
       new: tidyUpUnit(newUnit),
     };
-    await this.sqsService.sendUpdateMessage(message, 'unit');
+    await this.sqsService.sendUpdateMessage(message, 'UNIT');
   }
 
   async deleteUnit(oldUnit: UnitDto) {
     const message: DeleteMessage<UnitDto> = { old: tidyUpUnit(oldUnit) };
-    await this.sqsService.sendDeleteMessage(message, 'unit');
+    await this.sqsService.sendDeleteMessage(message, 'UNIT');
   }
 
   async createSystem(newSystem: SystemDto) {
     const message: CreateMessage<SystemDto> = {
       new: tidyUpSystem(newSystem),
     };
-    await this.sqsService.sendCreateMessage(message, 'system');
+    await this.sqsService.sendCreateMessage(message, 'SYSTEM');
   }
 
   async updateSystem(oldSystem: SystemDto, newSystem: SystemDto) {
@@ -86,38 +91,42 @@ export class TriggerHookService {
       old: tidyUpSystem(oldSystem),
       new: tidyUpSystem(newSystem),
     };
-    await this.sqsService.sendUpdateMessage(message, 'system');
+    await this.sqsService.sendUpdateMessage(message, 'SYSTEM');
   }
 
   async deleteSystem(oldSystem: SystemDto) {
     const message: DeleteMessage<SystemDto> = {
       old: tidyUpSystem(oldSystem),
     };
-    await this.sqsService.sendDeleteMessage(message, 'system');
+    await this.sqsService.sendDeleteMessage(message, 'SYSTEM');
   }
 
-  async createDWHConnection(newDWHConnection: DWHConnectionDto) {
-    const message: CreateMessage<DWHConnectionDto> = {
-      new: tidyUpDWHConnection(newDWHConnection),
-    };
-    await this.sqsService.sendCreateMessage(message, 'dwh_connection');
-  }
-
-  async updateDWHConnection(
-    oldDWHConnection: DWHConnectionDto,
-    newDWHConnection: DWHConnectionDto,
+  async createRedshiftConfiguration(
+    newRedshiftConfiguration: RedshiftConfigurationDto,
   ) {
-    const message: UpdateMessage<DWHConnectionDto> = {
-      old: tidyUpDWHConnection(oldDWHConnection),
-      new: tidyUpDWHConnection(newDWHConnection),
+    const message: CreateMessage<RedshiftConfigurationDto> = {
+      new: tidyUpRedshiftConfiguration(newRedshiftConfiguration),
     };
-    await this.sqsService.sendUpdateMessage(message, 'dwh_connection');
+    await this.sqsService.sendCreateMessage(message, 'DWH_CONNECTION');
   }
 
-  async deleteDWHConnection(oldDWHConnection: DWHConnectionDto) {
-    const message: DeleteMessage<DWHConnectionDto> = {
-      old: tidyUpDWHConnection(oldDWHConnection),
+  async updateRedshiftConfiguration(
+    oldRedshiftConfiguration: RedshiftConfigurationDto,
+    newRedshiftConfiguration: RedshiftConfigurationDto,
+  ) {
+    const message: UpdateMessage<RedshiftConfigurationDto> = {
+      old: tidyUpRedshiftConfiguration(oldRedshiftConfiguration),
+      new: tidyUpRedshiftConfiguration(newRedshiftConfiguration),
     };
-    await this.sqsService.sendDeleteMessage(message, 'dwh_connection');
+    await this.sqsService.sendUpdateMessage(message, 'DWH_CONNECTION');
+  }
+
+  async deleteRedshiftConfiguration(
+    oldRedshiftConfiguration: RedshiftConfigurationDto,
+  ) {
+    const message: DeleteMessage<RedshiftConfigurationDto> = {
+      old: tidyUpRedshiftConfiguration(oldRedshiftConfiguration),
+    };
+    await this.sqsService.sendDeleteMessage(message, 'DWH_CONNECTION');
   }
 }

@@ -3,6 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SQSConfig } from './sqs.config';
 
+type Entity = 'USER' | 'UNIT' | 'SYSTEM' | 'DWH_CONNECTION';
+type Event = 'CREATE' | 'UPDATE' | 'DELETE';
+
 type CreateMessage<T = object> = { new: T };
 type UpdateMessage<T = object> = { old: T; new: T };
 type DeleteMessage<T = object> = { old: T };
@@ -25,11 +28,7 @@ export class SQSService {
     this.queueUrl = configService.getOrThrow<string>('QUEUE_URL');
   }
 
-  private async sendMessage(
-    message: object,
-    entity: string,
-    eventType: 'CREATE' | 'UPDATE' | 'DELETE',
-  ) {
+  private async sendMessage(message: object, entity: Entity, eventType: Event) {
     const messageJson = JSON.stringify(message);
 
     return await this.client.send(
@@ -44,15 +43,15 @@ export class SQSService {
     );
   }
 
-  async sendCreateMessage(message: CreateMessage, entity: string) {
+  async sendCreateMessage(message: CreateMessage, entity: Entity) {
     return await this.sendMessage(message, entity, 'CREATE');
   }
 
-  async sendUpdateMessage(message: UpdateMessage, entity: string) {
+  async sendUpdateMessage(message: UpdateMessage, entity: Entity) {
     return await this.sendMessage(message, entity, 'UPDATE');
   }
 
-  async sendDeleteMessage(message: DeleteMessage, entity: string) {
+  async sendDeleteMessage(message: DeleteMessage, entity: Entity) {
     return await this.sendMessage(message, entity, 'DELETE');
   }
 }

@@ -2,14 +2,14 @@ import { Body, Controller, Get, HttpException, Post } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
 import {
-  DeleteDWHConnectionPayloadDto,
+  DeleteRedshiftConfigurationPayloadDto,
   DeleteSystemPayloadDto,
   DeleteUnitPayloadDto,
   GenericPayloadDto,
-  InsertDWHConnectionPayloadDto,
+  InsertRedshiftConfigurationPayloadDto,
   InsertSystemPayloadDto,
   InsertUnitPayloadDto,
-  UpdateDWHConnectionPayloadDto,
+  UpdateRedshiftConfigurationPayloadDto,
   UpdateSystemPayloadDto,
   UpdateUnitPayloadDto,
 } from './trigger-hook.dtos';
@@ -21,7 +21,7 @@ import {
 import { TriggerHookService } from './trigger-hook.service';
 
 type Response = {
-  entity: string;
+  entity: 'user' | 'unit' | 'system' | 'redshift_configuration';
   action: 'insert' | 'update' | 'delete';
 };
 
@@ -157,45 +157,45 @@ export class TriggerHookController {
     );
   }
 
-  @Post('/dwh-connection')
-  async triggerHookDwhConnection(
+  @Post('/redshift_configuration')
+  async triggerHookRedshiftConfiguration(
     @Body() body: GenericPayloadDto,
   ): Promise<Response> {
-    const insertDWHConnectionPayload = plainToClass(
-      InsertDWHConnectionPayloadDto,
+    const insertRedshiftConfigurationPayload = plainToClass(
+      InsertRedshiftConfigurationPayloadDto,
       body,
     );
-    const insertErrors = await validate(insertDWHConnectionPayload);
+    const insertErrors = await validate(insertRedshiftConfigurationPayload);
     if (insertErrors.length === 0) {
-      await this.triggerHookService.createDWHConnection(
-        insertDWHConnectionPayload.event.data.new,
+      await this.triggerHookService.createRedshiftConfiguration(
+        insertRedshiftConfigurationPayload.event.data.new,
       );
-      return { entity: 'dwh-connection', action: 'insert' };
+      return { entity: 'redshift_configuration', action: 'insert' };
     }
 
-    const updateDWHConnectionPayload = plainToClass(
-      UpdateDWHConnectionPayloadDto,
+    const updateRedshiftConfigurationPayload = plainToClass(
+      UpdateRedshiftConfigurationPayloadDto,
       body,
     );
-    const updateErrors = await validate(updateDWHConnectionPayload);
+    const updateErrors = await validate(updateRedshiftConfigurationPayload);
     if (updateErrors.length === 0) {
-      await this.triggerHookService.updateDWHConnection(
-        updateDWHConnectionPayload.event.data.old,
-        updateDWHConnectionPayload.event.data.new,
+      await this.triggerHookService.updateRedshiftConfiguration(
+        updateRedshiftConfigurationPayload.event.data.old,
+        updateRedshiftConfigurationPayload.event.data.new,
       );
-      return { entity: 'dwh-connection', action: 'update' };
+      return { entity: 'redshift_configuration', action: 'update' };
     }
 
-    const deleteDWHConnectionPayload = plainToClass(
-      DeleteDWHConnectionPayloadDto,
+    const deleteRedshiftConfigurationPayload = plainToClass(
+      DeleteRedshiftConfigurationPayloadDto,
       body,
     );
-    const deleteErrors = await validate(deleteDWHConnectionPayload, {});
+    const deleteErrors = await validate(deleteRedshiftConfigurationPayload, {});
     if (deleteErrors.length === 0) {
-      await this.triggerHookService.deleteDWHConnection(
-        deleteDWHConnectionPayload.event.data.old,
+      await this.triggerHookService.deleteRedshiftConfiguration(
+        deleteRedshiftConfigurationPayload.event.data.old,
       );
-      return { entity: 'dwh-connection', action: 'delete' };
+      return { entity: 'redshift_configuration', action: 'delete' };
     }
 
     throw new HttpException(
