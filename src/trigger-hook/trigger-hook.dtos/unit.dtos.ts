@@ -6,7 +6,11 @@ import {
   IsUUID,
   ValidateNested,
 } from 'class-validator';
-import { GenericEventDataDto, GenericEventDto } from './generic.dto';
+import {
+  GenericEventDataDto,
+  GenericEventDto,
+  GenericPayloadDto,
+} from './generic.dtos';
 
 export class UnitDto {
   @IsUUID()
@@ -81,21 +85,21 @@ export class DeleteUnitEventDto extends GenericEventDto {
   data: DeleteUnitEventDataDto;
 }
 
-export class InsertUnitPayloadDto {
+export class InsertUnitPayloadDto extends GenericPayloadDto {
   @IsObject()
   @ValidateNested()
   @Type(() => InsertUnitEventDto)
   event: InsertUnitEventDto;
 }
 
-export class UpdateUnitPayloadDto {
+export class UpdateUnitPayloadDto extends GenericPayloadDto {
   @IsObject()
   @ValidateNested()
   @Type(() => UpdateUnitEventDto)
   event: UpdateUnitEventDto;
 }
 
-export class DeleteUnitPayloadDto {
+export class DeleteUnitPayloadDto extends GenericPayloadDto {
   @IsObject()
   @ValidateNested()
   @Type(() => DeleteUnitEventDto)

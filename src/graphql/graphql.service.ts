@@ -3,10 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { GraphQLClient } from 'graphql-request';
 import gql from 'graphql-tag';
 import { GraphQLConfig } from './graphql.config';
-import { getSdk, Sdk } from './graphql.sdk';
+import { getSdk } from './graphql.sdk';
 
 type UUID = string;
-type User = Awaited<ReturnType<Sdk['User']>>['user_by_pk'];
 
 @Injectable()
 export class GraphQLService {
@@ -23,20 +22,22 @@ export class GraphQLService {
     });
   }
 
-  async getUser(userId: string): Promise<User> {
-    const sdk = getSdk(this.client);
-    const userData = await sdk.User({ userId });
-
-    return userData.user_by_pk;
-  }
-
   async getUserSystemIds(userId: UUID): Promise<UUID[]> {
     const sdk = getSdk(this.client);
     const userSystemIdsData = await sdk.UserSystemIds({ userId });
 
-    return userSystemIdsData.user_by_pk.unit_access.map(
-      (unitAccess) => unitAccess.unit.system_id,
-    );
+    const systemIds = userSystemIdsData.user_by_pk?.unit_access
+      .map((unitAccess) => unitAccess.unit?.system_id)
+      .filter((systemId): systemId is UUID => !!systemId);
+
+    return systemIds || [];
+  }
+
+  async getUnitSystemId(unitId: UUID): Promise<UUID | undefined> {
+    const sdk = getSdk(this.client);
+    const unitSystemIdsData = await sdk.UnitSystemIds({ unitId });
+
+    return unitSystemIdsData.unit_by_pk?.system_id;
   }
 
   async getSystemIds(): Promise<UUID[]> {
@@ -48,25 +49,21 @@ export class GraphQLService {
 }
 
 gql`
-  query User($userId: uuid!) {
-    user_by_pk(id: $userId) {
-      id
-      email
-      first_name
-      last_name
-    }
-  }
-`;
-
-gql`
   query UserSystemIds($userId: uuid!) {
     user_by_pk(id: $userId) {
-      id
       unit_access {
         unit {
           system_id
         }
       }
+    }
+  }
+`;
+
+gql`
+  query UnitSystemIds($unitId: uuid!) {
+    unit_by_pk(id: $unitId) {
+      system_id
     }
   }
 `;

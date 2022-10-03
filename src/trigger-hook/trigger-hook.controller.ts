@@ -5,23 +5,39 @@ import {
   DeleteRedshiftConfigurationPayloadDto,
   DeleteSystemPayloadDto,
   DeleteUnitPayloadDto,
+  DeleteUnitUserPayloadDto,
   GenericPayloadDto,
   InsertRedshiftConfigurationPayloadDto,
   InsertSystemPayloadDto,
   InsertUnitPayloadDto,
+  InsertUnitUserPayloadDto,
   UpdateRedshiftConfigurationPayloadDto,
   UpdateSystemPayloadDto,
   UpdateUnitPayloadDto,
-} from './trigger-hook.dtos';
-import {
+  UpdateUnitUserPayloadDto,
   DeleteUserPayloadDto,
   InsertUserPayloadDto,
   UpdateUserPayloadDto,
+  InsertSystemAdminPayloadDto,
+  UpdateSystemAdminPayloadDto,
+  DeleteSystemAdminPayloadDto,
 } from './trigger-hook.dtos';
+import {
+  DeleteGlobalAdminPayloadDto,
+  InsertGlobalAdminPayloadDto,
+  UpdateGlobalAdminPayloadDto,
+} from './trigger-hook.dtos/global-admin.dtos';
 import { TriggerHookService } from './trigger-hook.service';
 
 type Response = {
-  entity: 'user' | 'unit' | 'system' | 'redshift_configuration';
+  entity:
+    | 'user'
+    | 'unit_user'
+    | 'system_admin'
+    | 'global_admin'
+    | 'unit'
+    | 'system'
+    | 'redshift_configuration';
   action: 'insert' | 'update' | 'delete';
 };
 
@@ -62,6 +78,153 @@ export class TriggerHookController {
         deleteUserPayload.event.data.old,
       );
       return { entity: 'user', action: 'delete' };
+    }
+
+    throw new HttpException(
+      {
+        message: 'Invalid payload received',
+        insertErrors,
+        updateErrors,
+        deleteErrors,
+      },
+      422,
+    );
+  }
+
+  @Post('/unit_user')
+  async triggerHookUnitUser(
+    @Body() body: GenericPayloadDto,
+  ): Promise<Response> {
+    const insertUnitUserPayload = plainToClass(InsertUnitUserPayloadDto, body);
+    const insertErrors = await validate(insertUnitUserPayload);
+    if (insertErrors.length === 0) {
+      await this.triggerHookService.createUnitUser(
+        insertUnitUserPayload.event.data.new,
+      );
+      return { entity: 'unit_user', action: 'insert' };
+    }
+
+    const updateUnitUserPayload = plainToClass(UpdateUnitUserPayloadDto, body);
+    const updateErrors = await validate(updateUnitUserPayload);
+    if (updateErrors.length === 0) {
+      await this.triggerHookService.updateUnitUser(
+        updateUnitUserPayload.event.data.old,
+        updateUnitUserPayload.event.data.new,
+      );
+      return { entity: 'unit_user', action: 'update' };
+    }
+
+    const deleteUnitUserPayload = plainToClass(DeleteUnitUserPayloadDto, body);
+    const deleteErrors = await validate(deleteUnitUserPayload, {});
+    if (deleteErrors.length === 0) {
+      await this.triggerHookService.deleteUnitUser(
+        deleteUnitUserPayload.event.data.old,
+      );
+      return { entity: 'unit_user', action: 'delete' };
+    }
+
+    throw new HttpException(
+      {
+        message: 'Invalid payload received',
+        insertErrors,
+        updateErrors,
+        deleteErrors,
+      },
+      422,
+    );
+  }
+
+  @Post('/system_admin')
+  async triggerHookSystemAdmin(
+    @Body() body: GenericPayloadDto,
+  ): Promise<Response> {
+    const insertSystemAdminPayload = plainToClass(
+      InsertSystemAdminPayloadDto,
+      body,
+    );
+    const insertErrors = await validate(insertSystemAdminPayload);
+    if (insertErrors.length === 0) {
+      await this.triggerHookService.createSystemAdmin(
+        insertSystemAdminPayload.event.data.new,
+      );
+      return { entity: 'system_admin', action: 'insert' };
+    }
+
+    const updateSystemAdminPayload = plainToClass(
+      UpdateSystemAdminPayloadDto,
+      body,
+    );
+    const updateErrors = await validate(updateSystemAdminPayload);
+    if (updateErrors.length === 0) {
+      await this.triggerHookService.updateSystemAdmin(
+        updateSystemAdminPayload.event.data.old,
+        updateSystemAdminPayload.event.data.new,
+      );
+      return { entity: 'system_admin', action: 'update' };
+    }
+
+    const deleteSystemAdminPayload = plainToClass(
+      DeleteSystemAdminPayloadDto,
+      body,
+    );
+    const deleteErrors = await validate(deleteSystemAdminPayload, {});
+    if (deleteErrors.length === 0) {
+      await this.triggerHookService.deleteSystemAdmin(
+        deleteSystemAdminPayload.event.data.old,
+      );
+      return { entity: 'system_admin', action: 'delete' };
+    }
+
+    throw new HttpException(
+      {
+        message: 'Invalid payload received',
+        insertErrors,
+        updateErrors,
+        deleteErrors,
+      },
+      422,
+    );
+  }
+
+  @Post('/global_admin')
+  async triggerHookGlobalAdmin(
+    @Body() body: GenericPayloadDto,
+  ): Promise<Response> {
+    const insertGlobalAdminPayload = plainToClass(
+      InsertGlobalAdminPayloadDto,
+      body,
+    );
+    const insertErrors = await validate(insertGlobalAdminPayload);
+    if (insertErrors.length === 0) {
+      await this.triggerHookService.createGlobalAdmin(
+        insertGlobalAdminPayload.event.data.new,
+      );
+      return { entity: 'global_admin', action: 'insert' };
+    }
+
+    const updateGlobalAdminPayload = plainToClass(
+      UpdateGlobalAdminPayloadDto,
+      body,
+    );
+    const updateErrors = await validate(updateGlobalAdminPayload);
+    if (updateErrors.length === 0) {
+      await this.triggerHookService.updateGlobalAdmin(
+        updateGlobalAdminPayload.event.data.old,
+        updateGlobalAdminPayload.event.data.new,
+      );
+      return { entity: 'global_admin', action: 'update' };
+    }
+
+    const deleteGlobalAdminPayload = plainToClass(
+      DeleteGlobalAdminPayloadDto,
+      body,
+    );
+    const deleteErrors = await validate(deleteGlobalAdminPayload, {});
+    if (deleteErrors.length === 0) {
+      await this.triggerHookService.deleteGlobalAdmin(
+        deleteGlobalAdminPayload.event.data.old,
+      );
+      return { entity: 'global_admin', action: 'delete' };
     }
 
     throw new HttpException(

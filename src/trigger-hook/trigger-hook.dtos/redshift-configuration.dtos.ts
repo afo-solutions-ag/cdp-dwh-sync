@@ -11,7 +11,7 @@ import {
   GenericEventDataDto,
   GenericEventDto,
   GenericPayloadDto,
-} from './generic.dto';
+} from './generic.dtos';
 
 export class RedshiftConfigurationDto {
   @IsUUID()

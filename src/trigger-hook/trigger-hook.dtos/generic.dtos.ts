@@ -20,11 +20,11 @@ class TableDto {
 export class GenericEventDataDto {
   @IsOptional()
   @IsObject()
-  old: object;
+  old: object | null;
 
   @IsOptional()
   @IsObject()
-  new: object;
+  new: object | null;
 }
 
 export class GenericEventDto {

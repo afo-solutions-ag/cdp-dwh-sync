@@ -3,16 +3,33 @@ import { GraphQLService } from 'src/graphql/graphql.service';
 import { SQSService } from 'src/sqs/sqs.service';
 import {
   RedshiftConfigurationDto,
+  SystemAdminDto,
   SystemDto,
   UnitDto,
+  UnitUserDto,
   UserDto,
 } from './trigger-hook.dtos';
+import { GlobalAdminDto } from './trigger-hook.dtos/global-admin.dtos';
 
 const tidyUpUser = (user: UserDto): UserDto => ({
   id: user.id,
   email: user.email,
   first_name: user.first_name,
   last_name: user.last_name,
+});
+
+const tidyUpUnitUser = (unitUser: UnitUserDto): UnitUserDto => ({
+  unit_id: unitUser.unit_id,
+  user_id: unitUser.user_id,
+});
+
+const tidyUpSystemAdmin = (systemAdmin: SystemAdminDto): SystemAdminDto => ({
+  user_id: systemAdmin.user_id,
+  system_id: systemAdmin.system_id,
+});
+
+const tidyUpGlobalAdmin = (globalAdmin: GlobalAdminDto): GlobalAdminDto => ({
+  user_id: globalAdmin.user_id,
 });
 
 const tidyUpUnit = (unit: UnitDto): UnitDto => ({
@@ -82,6 +99,166 @@ export class TriggerHookService {
     );
   }
 
+  async createUnitUser(newUnitUser: UnitUserDto) {
+    newUnitUser = tidyUpUnitUser(newUnitUser);
+
+    console.log(
+      'Create unit user triggered with',
+      JSON.stringify(newUnitUser, null, 2),
+    );
+    const systemId = await this.graphQLService.getUnitSystemId(
+      newUnitUser.unit_id,
+    );
+    if (systemId === undefined) {
+      throw new Error(`No system found for unit ${newUnitUser.unit_id}`);
+    }
+    await this.sqsService.sendMessage({ systemId }, 'USER');
+  }
+
+  async updateUnitUser(oldUnitUser: UnitUserDto, newUnitUser: UnitUserDto) {
+    oldUnitUser = tidyUpUnitUser(oldUnitUser);
+    newUnitUser = tidyUpUnitUser(newUnitUser);
+
+    console.log(
+      'Update unit user triggered with',
+      JSON.stringify(oldUnitUser, null, 2),
+      JSON.stringify(newUnitUser, null, 2),
+    );
+    const oldSystemId = await this.graphQLService.getUnitSystemId(
+      oldUnitUser.unit_id,
+    );
+    const newSystemId = await this.graphQLService.getUnitSystemId(
+      newUnitUser.unit_id,
+    );
+    if (oldSystemId === undefined || newSystemId === undefined) {
+      throw new Error(
+        `No system found for unit ${oldUnitUser.unit_id} or ${newUnitUser.unit_id}`,
+      );
+    }
+    await this.sqsService.sendMessage({ systemId: oldSystemId }, 'USER');
+    if (oldSystemId !== newSystemId) {
+      await this.sqsService.sendMessage({ systemId: newSystemId }, 'USER');
+    }
+  }
+
+  async deleteUnitUser(oldUnitUser: UnitUserDto) {
+    oldUnitUser = tidyUpUnitUser(oldUnitUser);
+
+    console.log(
+      'Delete unit user triggered with',
+      JSON.stringify(oldUnitUser, null, 2),
+    );
+    const systemId = await this.graphQLService.getUnitSystemId(
+      oldUnitUser.unit_id,
+    );
+    if (systemId === undefined) {
+      throw new Error(`No system found for unit ${oldUnitUser.unit_id}`);
+    }
+    await this.sqsService.sendMessage({ systemId }, 'USER');
+  }
+
+  async createSystemAdmin(newSystemAdmin: SystemAdminDto) {
+    newSystemAdmin = tidyUpSystemAdmin(newSystemAdmin);
+
+    console.log(
+      'Create system admin triggered with',
+      JSON.stringify(newSystemAdmin, null, 2),
+    );
+    await this.sqsService.sendMessage(
+      { systemId: newSystemAdmin.system_id },
+      'USER',
+    );
+  }
+
+  async updateSystemAdmin(
+    oldSystemAdmin: SystemAdminDto,
+    newSystemAdmin: SystemAdminDto,
+  ) {
+    oldSystemAdmin = tidyUpSystemAdmin(oldSystemAdmin);
+
+    console.log(
+      'Update system admin triggered with',
+      JSON.stringify(oldSystemAdmin, null, 2),
+      JSON.stringify(newSystemAdmin, null, 2),
+    );
+    await this.sqsService.sendMessage(
+      { systemId: oldSystemAdmin.system_id },
+      'USER',
+    );
+    if (oldSystemAdmin.system_id !== newSystemAdmin.system_id) {
+      await this.sqsService.sendMessage(
+        { systemId: newSystemAdmin.system_id },
+        'USER',
+      );
+    }
+  }
+
+  async deleteSystemAdmin(oldSystemAdmin: SystemAdminDto) {
+    oldSystemAdmin = tidyUpSystemAdmin(oldSystemAdmin);
+
+    console.log(
+      'Delete system admin triggered with',
+      JSON.stringify(oldSystemAdmin, null, 2),
+    );
+    await this.sqsService.sendMessage(
+      { systemId: oldSystemAdmin.system_id },
+      'USER',
+    );
+  }
+
+  async createGlobalAdmin(newGlobalAdmin: GlobalAdminDto) {
+    newGlobalAdmin = tidyUpGlobalAdmin(newGlobalAdmin);
+
+    console.log(
+      'Create global admin triggered with',
+      JSON.stringify(newGlobalAdmin, null, 2),
+    );
+    const systemIds = await this.graphQLService.getSystemIds();
+
+    await Promise.all(
+      systemIds.map(async (systemId) => {
+        await this.sqsService.sendMessage({ systemId }, 'USER');
+      }),
+    );
+  }
+
+  async updateGlobalAdmin(
+    oldGlobalAdmin: GlobalAdminDto,
+    newGlobalAdmin: GlobalAdminDto,
+  ) {
+    oldGlobalAdmin = tidyUpGlobalAdmin(oldGlobalAdmin);
+    newGlobalAdmin = tidyUpGlobalAdmin(newGlobalAdmin);
+
+    console.log(
+      'Update global admin triggered with',
+      JSON.stringify(oldGlobalAdmin, null, 2),
+      JSON.stringify(newGlobalAdmin, null, 2),
+    );
+    const systemIds = await this.graphQLService.getSystemIds();
+
+    await Promise.all(
+      systemIds.map(async (systemId) => {
+        await this.sqsService.sendMessage({ systemId }, 'USER');
+      }),
+    );
+  }
+
+  async deleteGlobalAdmin(oldGlobalAdmin: GlobalAdminDto) {
+    oldGlobalAdmin = tidyUpGlobalAdmin(oldGlobalAdmin);
+
+    console.log(
+      'Delete global admin triggered with',
+      JSON.stringify(oldGlobalAdmin, null, 2),
+    );
+    const systemIds = await this.graphQLService.getSystemIds();
+
+    await Promise.all(
+      systemIds.map(async (systemId) => {
+        await this.sqsService.sendMessage({ systemId }, 'USER');
+      }),
+    );
+  }
+
   async createUnit(newUnit: UnitDto) {
     newUnit = tidyUpUnit(newUnit);
 
@@ -98,11 +275,12 @@ export class TriggerHookService {
       JSON.stringify(oldUnit, null, 2),
       JSON.stringify(newUnit, null, 2),
     );
-    const oldSystemId = oldUnit.system_id;
-    const newSystemId = newUnit.system_id;
-    await this.sqsService.sendMessage({ systemId: oldSystemId }, 'UNIT');
-    if (oldSystemId !== newSystemId) {
-      await this.sqsService.sendMessage({ systemId: newSystemId }, 'UNIT');
+    await this.sqsService.sendMessage({ systemId: oldUnit.system_id }, 'UNIT');
+    if (oldUnit.system_id !== newUnit.system_id) {
+      await this.sqsService.sendMessage(
+        { systemId: newUnit.system_id },
+        'UNIT',
+      );
     }
   }
 
@@ -132,11 +310,9 @@ export class TriggerHookService {
       JSON.stringify(oldSystem, null, 2),
       JSON.stringify(newSystem, null, 2),
     );
-    const oldSystemId = oldSystem.id;
-    const newSystemId = newSystem.id;
-    await this.sqsService.sendMessage({ systemId: oldSystemId }, 'SYSTEM');
-    if (oldSystemId !== newSystemId) {
-      await this.sqsService.sendMessage({ systemId: newSystemId }, 'SYSTEM');
+    await this.sqsService.sendMessage({ systemId: oldSystem.id }, 'SYSTEM');
+    if (oldSystem.id !== newSystem.id) {
+      await this.sqsService.sendMessage({ systemId: newSystem.id }, 'SYSTEM');
     }
   }
 
@@ -183,15 +359,15 @@ export class TriggerHookService {
       JSON.stringify(oldRedshiftConfiguration, null, 2),
       JSON.stringify(newRedshiftConfiguration, null, 2),
     );
-    const oldSystemId = oldRedshiftConfiguration.system_id;
-    const newSystemId = newRedshiftConfiguration.system_id;
     await this.sqsService.sendMessage(
-      { systemId: oldSystemId },
+      { systemId: oldRedshiftConfiguration.system_id },
       'REDSHIFT_CONFIGURATION',
     );
-    if (oldSystemId !== newSystemId) {
+    if (
+      oldRedshiftConfiguration.system_id !== newRedshiftConfiguration.system_id
+    ) {
       await this.sqsService.sendMessage(
-        { systemId: newSystemId },
+        { systemId: newRedshiftConfiguration.system_id },
         'REDSHIFT_CONFIGURATION',
       );
     }
