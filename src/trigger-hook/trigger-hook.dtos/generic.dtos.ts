@@ -1,9 +1,9 @@
 import { Type } from 'class-transformer';
 import {
+  Equals,
   IsDateString,
-  IsIn,
+  IsEmpty,
   IsObject,
-  IsOptional,
   IsString,
   IsUUID,
   ValidateNested,
@@ -16,28 +16,67 @@ class TableDto {
   @IsString()
   name: string;
 }
+export class GenericInsertEventDataDto {
+  @IsEmpty()
+  old: null;
 
-export class GenericEventDataDto {
-  @IsOptional()
   @IsObject()
-  old: object | null;
-
-  @IsOptional()
-  @IsObject()
-  new: object | null;
+  new: object;
 }
 
-export class GenericEventDto {
+export class GenericUpdateEventDataDto {
+  @IsObject()
+  old: object;
+
+  @IsObject()
+  new: object;
+}
+
+export class GenericDeleteEventDataDto {
+  @IsObject()
+  old: object;
+
+  @IsEmpty()
+  new: null;
+}
+
+export class GenericInsertEventDto {
+  @Equals('INSERT')
+  op: 'INSERT';
+
   @IsObject()
   session_variables: object;
 
-  @IsIn(['INSERT', 'UPDATE', 'DELETE', 'MANUAL'])
-  op: 'INSERT' | 'UPDATE' | 'DELETE' | 'MANUAL';
+  @IsObject()
+  @ValidateNested()
+  @Type(() => GenericInsertEventDataDto)
+  data: GenericInsertEventDataDto;
+}
+
+export class GenericUpdateEventDto {
+  @Equals('UPDATE')
+  op: 'UPDATE';
+
+  @IsObject()
+  session_variables: object;
 
   @IsObject()
   @ValidateNested()
-  @Type(() => GenericEventDataDto)
-  data: GenericEventDataDto;
+  @Type(() => GenericUpdateEventDataDto)
+  data: GenericUpdateEventDataDto;
+}
+
+export class GenericDeleteEventDto {
+  @Equals('DELETE')
+  op: 'DELETE';
+
+  @IsObject()
+  session_variables: object;
+
+  @IsObject()
+  @ValidateNested()
+  @Type(() => GenericDeleteEventDataDto)
+  data: GenericDeleteEventDataDto;
 }
 
 export class GenericPayloadDto {
@@ -54,8 +93,18 @@ export class GenericPayloadDto {
 
   @IsObject()
   @ValidateNested()
-  @Type(() => GenericEventDto)
-  event: GenericEventDto;
+  @Type(() => Object, {
+    keepDiscriminatorProperty: true,
+    discriminator: {
+      property: 'op',
+      subTypes: [
+        { value: GenericInsertEventDto, name: 'INSERT' },
+        { value: GenericUpdateEventDto, name: 'UPDATE' },
+        { value: GenericDeleteEventDto, name: 'DELETE' },
+      ],
+    },
+  })
+  event: GenericInsertEventDto | GenericUpdateEventDto | GenericDeleteEventDto;
 }
 
 // Example of a request body:

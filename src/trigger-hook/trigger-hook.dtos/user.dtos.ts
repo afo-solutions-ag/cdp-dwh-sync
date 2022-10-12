@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import {
-  Equals,
   IsObject,
   IsOptional,
   IsString,
@@ -8,9 +7,13 @@ import {
   ValidateNested,
 } from 'class-validator';
 import {
-  GenericEventDataDto,
-  GenericEventDto,
+  GenericDeleteEventDataDto,
+  GenericDeleteEventDto,
+  GenericInsertEventDataDto,
+  GenericInsertEventDto,
   GenericPayloadDto,
+  GenericUpdateEventDataDto,
+  GenericUpdateEventDto,
 } from './generic.dtos';
 
 export class UserDto {
@@ -29,17 +32,14 @@ export class UserDto {
   last_name: string;
 }
 
-class InsertUserEventDataDto extends GenericEventDataDto {
-  @Equals(null)
-  old: null;
-
+class InsertUserEventDataDto extends GenericInsertEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => UserDto)
   new: UserDto;
 }
 
-class UpdateUserEventDataDto extends GenericEventDataDto {
+class UpdateUserEventDataDto extends GenericUpdateEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => UserDto)
@@ -51,63 +51,47 @@ class UpdateUserEventDataDto extends GenericEventDataDto {
   new: UserDto;
 }
 
-class DeleteUserEventDataDto extends GenericEventDataDto {
+class DeleteUserEventDataDto extends GenericDeleteEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => UserDto)
   old: UserDto;
-
-  @Equals(null)
-  new: null;
 }
 
-export class InsertUserEventDto extends GenericEventDto {
-  @Equals('INSERT')
-  op: 'INSERT';
-
+export class InsertUserEventDto extends GenericInsertEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => InsertUserEventDataDto)
   data: InsertUserEventDataDto;
 }
 
-export class UpdateUserEventDto extends GenericEventDto {
-  @Equals('UPDATE')
-  op: 'UPDATE';
-
+export class UpdateUserEventDto extends GenericUpdateEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => UpdateUserEventDataDto)
   data: UpdateUserEventDataDto;
 }
 
-export class DeleteUserEventDto extends GenericEventDto {
-  @Equals('DELETE')
-  op: 'DELETE';
-
+export class DeleteUserEventDto extends GenericDeleteEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => DeleteUserEventDataDto)
   data: DeleteUserEventDataDto;
 }
 
-export class InsertUserPayloadDto extends GenericPayloadDto {
+export class UserPayloadDto extends GenericPayloadDto {
   @IsObject()
   @ValidateNested()
-  @Type(() => InsertUserEventDto)
-  event: InsertUserEventDto;
-}
-
-export class UpdateUserPayloadDto extends GenericPayloadDto {
-  @IsObject()
-  @ValidateNested()
-  @Type(() => UpdateUserEventDto)
-  event: UpdateUserEventDto;
-}
-
-export class DeleteUserPayloadDto extends GenericPayloadDto {
-  @IsObject()
-  @ValidateNested()
-  @Type(() => DeleteUserEventDto)
-  event: DeleteUserEventDto;
+  @Type(() => Object, {
+    keepDiscriminatorProperty: true,
+    discriminator: {
+      property: 'op',
+      subTypes: [
+        { value: InsertUserEventDto, name: 'INSERT' },
+        { value: UpdateUserEventDto, name: 'UPDATE' },
+        { value: DeleteUserEventDto, name: 'DELETE' },
+      ],
+    },
+  })
+  event: InsertUserEventDto | UpdateUserEventDto | DeleteUserEventDto;
 }

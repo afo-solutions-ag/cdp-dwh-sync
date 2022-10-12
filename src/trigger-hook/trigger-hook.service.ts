@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { GraphQLService } from 'src/graphql/graphql.service';
-import { SQSService } from 'src/sqs/sqs.service';
+import { GraphQLService } from '../graphql/graphql.service';
+import { SQSService } from '../sqs/sqs.service';
 import {
   RedshiftConfigurationDto,
   SystemAdminDto,

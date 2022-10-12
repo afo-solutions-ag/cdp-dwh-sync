@@ -12,22 +12,18 @@ export class SQSService {
   queueUrl: string;
 
   constructor(configService: ConfigService<SQSConfig>) {
-    const region = configService.getOrThrow<string>('REGION');
-    const accessKeyId = configService.getOrThrow<string>('ACCESS_KEY_ID');
-    const secretAccessKey =
-      configService.getOrThrow<string>('SECRET_ACCESS_KEY');
+    const queueARN = configService.getOrThrow<string>('QUEUE_ARN');
 
-    this.client = new SQSClient({
-      region,
-      credentials: { accessKeyId, secretAccessKey },
-    });
-    this.queueUrl = configService.getOrThrow<string>('QUEUE_URL');
+    const [, , service, region, accountId, queueName] = queueARN.split(':');
+
+    this.queueUrl = `https://${service}.${region}.amazonaws.com/${accountId}/${queueName}`;
+    this.client = new SQSClient({});
   }
 
-  async sendMessage(message: MessageBody, entity: Entity) {
+  async sendMessage(message: MessageBody, entity: Entity): Promise<boolean> {
     const messageJson = JSON.stringify(message);
 
-    return await this.client.send(
+    const output = await this.client.send(
       new SendMessageCommand({
         QueueUrl: this.queueUrl,
         MessageBody: messageJson,
@@ -36,5 +32,8 @@ export class SQSService {
         },
       }),
     );
+
+    console.log(`SQS message sent with id: ${output.MessageId}`);
+    return true;
   }
 }

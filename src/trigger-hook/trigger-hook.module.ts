@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GraphQLModule } from 'src/graphql/graphql.module';
-import { GraphQLService } from 'src/graphql/graphql.service';
-import { SQSModule } from 'src/sqs/sqs.module';
-import { SQSService } from 'src/sqs/sqs.service';
+import { GraphQLModule } from '../graphql/graphql.module';
+import { GraphQLService } from '../graphql/graphql.service';
+import { SQSModule } from '../sqs/sqs.module';
+import { SQSService } from '../sqs/sqs.service';
 import { TriggerHookController } from './trigger-hook.controller';
 import { TriggerHookService } from './trigger-hook.service';
 

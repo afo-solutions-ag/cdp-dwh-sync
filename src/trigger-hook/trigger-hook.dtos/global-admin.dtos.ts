@@ -1,9 +1,13 @@
 import { Type } from 'class-transformer';
-import { Equals, IsObject, IsUUID, ValidateNested } from 'class-validator';
+import { IsObject, IsUUID, ValidateNested } from 'class-validator';
 import {
-  GenericEventDataDto,
-  GenericEventDto,
+  GenericDeleteEventDataDto,
+  GenericDeleteEventDto,
+  GenericInsertEventDataDto,
+  GenericInsertEventDto,
   GenericPayloadDto,
+  GenericUpdateEventDataDto,
+  GenericUpdateEventDto,
 } from './generic.dtos';
 
 export class GlobalAdminDto {
@@ -11,17 +15,14 @@ export class GlobalAdminDto {
   user_id: string;
 }
 
-class InsertGlobalAdminEventDataDto extends GenericEventDataDto {
-  @Equals(null)
-  old: null;
-
+class InsertGlobalAdminEventDataDto extends GenericInsertEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => GlobalAdminDto)
   new: GlobalAdminDto;
 }
 
-class UpdateGlobalAdminEventDataDto extends GenericEventDataDto {
+class UpdateGlobalAdminEventDataDto extends GenericUpdateEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => GlobalAdminDto)
@@ -33,63 +34,50 @@ class UpdateGlobalAdminEventDataDto extends GenericEventDataDto {
   new: GlobalAdminDto;
 }
 
-class DeleteGlobalAdminEventDataDto extends GenericEventDataDto {
+class DeleteGlobalAdminEventDataDto extends GenericDeleteEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => GlobalAdminDto)
   old: GlobalAdminDto;
-
-  @Equals(null)
-  new: null;
 }
 
-export class InsertGlobalAdminEventDto extends GenericEventDto {
-  @Equals('INSERT')
-  op: 'INSERT';
-
+export class InsertGlobalAdminEventDto extends GenericInsertEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => InsertGlobalAdminEventDataDto)
   data: InsertGlobalAdminEventDataDto;
 }
 
-export class UpdateGlobalAdminEventDto extends GenericEventDto {
-  @Equals('UPDATE')
-  op: 'UPDATE';
-
+export class UpdateGlobalAdminEventDto extends GenericUpdateEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => UpdateGlobalAdminEventDataDto)
   data: UpdateGlobalAdminEventDataDto;
 }
 
-export class DeleteGlobalAdminEventDto extends GenericEventDto {
-  @Equals('DELETE')
-  op: 'DELETE';
-
+export class DeleteGlobalAdminEventDto extends GenericDeleteEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => DeleteGlobalAdminEventDataDto)
   data: DeleteGlobalAdminEventDataDto;
 }
 
-export class InsertGlobalAdminPayloadDto extends GenericPayloadDto {
+export class GlobalAdminPayloadDto extends GenericPayloadDto {
   @IsObject()
   @ValidateNested()
-  @Type(() => InsertGlobalAdminEventDto)
-  event: InsertGlobalAdminEventDto;
-}
-
-export class UpdateGlobalAdminPayloadDto extends GenericPayloadDto {
-  @IsObject()
-  @ValidateNested()
-  @Type(() => UpdateGlobalAdminEventDto)
-  event: UpdateGlobalAdminEventDto;
-}
-
-export class DeleteGlobalAdminPayloadDto extends GenericPayloadDto {
-  @IsObject()
-  @ValidateNested()
-  @Type(() => DeleteGlobalAdminEventDto)
-  event: DeleteGlobalAdminEventDto;
+  @Type(() => Object, {
+    keepDiscriminatorProperty: true,
+    discriminator: {
+      property: 'op',
+      subTypes: [
+        { value: InsertGlobalAdminEventDto, name: 'INSERT' },
+        { value: UpdateGlobalAdminEventDto, name: 'UPDATE' },
+        { value: DeleteGlobalAdminEventDto, name: 'DELETE' },
+      ],
+    },
+  })
+  event:
+    | InsertGlobalAdminEventDto
+    | UpdateGlobalAdminEventDto
+    | DeleteGlobalAdminEventDto;
 }

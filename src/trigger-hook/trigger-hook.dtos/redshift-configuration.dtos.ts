@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import {
-  Equals,
   IsObject,
   IsString,
   IsUrl,
@@ -8,9 +7,13 @@ import {
   ValidateNested,
 } from 'class-validator';
 import {
-  GenericEventDataDto,
-  GenericEventDto,
+  GenericDeleteEventDataDto,
+  GenericDeleteEventDto,
+  GenericInsertEventDataDto,
+  GenericInsertEventDto,
   GenericPayloadDto,
+  GenericUpdateEventDataDto,
+  GenericUpdateEventDto,
 } from './generic.dtos';
 
 export class RedshiftConfigurationDto {
@@ -30,17 +33,14 @@ export class RedshiftConfigurationDto {
   system_id: string;
 }
 
-class InsertRedshiftConfigurationEventDataDto extends GenericEventDataDto {
-  @Equals(null)
-  old: null;
-
+class InsertRedshiftConfigurationEventDataDto extends GenericInsertEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => RedshiftConfigurationDto)
   new: RedshiftConfigurationDto;
 }
 
-class UpdateRedshiftConfigurationEventDataDto extends GenericEventDataDto {
+class UpdateRedshiftConfigurationEventDataDto extends GenericUpdateEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => RedshiftConfigurationDto)
@@ -52,63 +52,50 @@ class UpdateRedshiftConfigurationEventDataDto extends GenericEventDataDto {
   new: RedshiftConfigurationDto;
 }
 
-class DeleteRedshiftConfigurationEventDataDto extends GenericEventDataDto {
+class DeleteRedshiftConfigurationEventDataDto extends GenericDeleteEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => RedshiftConfigurationDto)
   old: RedshiftConfigurationDto;
-
-  @Equals(null)
-  new: null;
 }
 
-export class InsertRedshiftConfigurationEventDto extends GenericEventDto {
-  @Equals('INSERT')
-  op: 'INSERT';
-
+export class InsertRedshiftConfigurationEventDto extends GenericInsertEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => InsertRedshiftConfigurationEventDataDto)
   data: InsertRedshiftConfigurationEventDataDto;
 }
 
-export class UpdateRedshiftConfigurationEventDto extends GenericEventDto {
-  @Equals('UPDATE')
-  op: 'UPDATE';
-
+export class UpdateRedshiftConfigurationEventDto extends GenericUpdateEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => UpdateRedshiftConfigurationEventDataDto)
   data: UpdateRedshiftConfigurationEventDataDto;
 }
 
-export class DeleteRedshiftConfigurationEventDto extends GenericEventDto {
-  @Equals('DELETE')
-  op: 'DELETE';
-
+export class DeleteRedshiftConfigurationEventDto extends GenericDeleteEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => DeleteRedshiftConfigurationEventDataDto)
   data: DeleteRedshiftConfigurationEventDataDto;
 }
 
-export class InsertRedshiftConfigurationPayloadDto extends GenericPayloadDto {
+export class RedshiftConfigurationPayloadDto extends GenericPayloadDto {
   @IsObject()
   @ValidateNested()
-  @Type(() => InsertRedshiftConfigurationEventDto)
-  event: InsertRedshiftConfigurationEventDto;
-}
-
-export class UpdateRedshiftConfigurationPayloadDto extends GenericPayloadDto {
-  @IsObject()
-  @ValidateNested()
-  @Type(() => UpdateRedshiftConfigurationEventDto)
-  event: UpdateRedshiftConfigurationEventDto;
-}
-
-export class DeleteRedshiftConfigurationPayloadDto extends GenericPayloadDto {
-  @IsObject()
-  @ValidateNested()
-  @Type(() => DeleteRedshiftConfigurationEventDto)
-  event: DeleteRedshiftConfigurationEventDto;
+  @Type(() => Object, {
+    keepDiscriminatorProperty: true,
+    discriminator: {
+      property: 'op',
+      subTypes: [
+        { value: InsertRedshiftConfigurationEventDto, name: 'INSERT' },
+        { value: UpdateRedshiftConfigurationEventDto, name: 'UPDATE' },
+        { value: DeleteRedshiftConfigurationEventDto, name: 'DELETE' },
+      ],
+    },
+  })
+  event:
+    | InsertRedshiftConfigurationEventDto
+    | UpdateRedshiftConfigurationEventDto
+    | DeleteRedshiftConfigurationEventDto;
 }

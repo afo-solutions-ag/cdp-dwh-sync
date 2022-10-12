@@ -1,12 +1,14 @@
 import { Type } from 'class-transformer';
+import { IsObject, IsString, IsUUID, ValidateNested } from 'class-validator';
 import {
-  Equals,
-  IsObject,
-  IsString,
-  IsUUID,
-  ValidateNested,
-} from 'class-validator';
-import { GenericEventDataDto, GenericEventDto, GenericPayloadDto } from '.';
+  GenericDeleteEventDataDto,
+  GenericDeleteEventDto,
+  GenericInsertEventDataDto,
+  GenericInsertEventDto,
+  GenericPayloadDto,
+  GenericUpdateEventDataDto,
+  GenericUpdateEventDto,
+} from './generic.dtos';
 
 export class SystemDto {
   @IsUUID()
@@ -16,17 +18,14 @@ export class SystemDto {
   name: string;
 }
 
-class InsertSystemEventDataDto extends GenericEventDataDto {
-  @Equals(null)
-  old: null;
-
+class InsertSystemEventDataDto extends GenericInsertEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => SystemDto)
   new: SystemDto;
 }
 
-class UpdateSystemEventDataDto extends GenericEventDataDto {
+class UpdateSystemEventDataDto extends GenericUpdateEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => SystemDto)
@@ -38,63 +37,47 @@ class UpdateSystemEventDataDto extends GenericEventDataDto {
   new: SystemDto;
 }
 
-class DeleteSystemEventDataDto extends GenericEventDataDto {
+class DeleteSystemEventDataDto extends GenericDeleteEventDataDto {
   @IsObject()
   @ValidateNested()
   @Type(() => SystemDto)
   old: SystemDto;
-
-  @Equals(null)
-  new: null;
 }
 
-export class InsertSystemEventDto extends GenericEventDto {
-  @Equals('INSERT')
-  op: 'INSERT';
-
+export class InsertSystemEventDto extends GenericInsertEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => InsertSystemEventDataDto)
   data: InsertSystemEventDataDto;
 }
 
-export class UpdateSystemEventDto extends GenericEventDto {
-  @Equals('UPDATE')
-  op: 'UPDATE';
-
+export class UpdateSystemEventDto extends GenericUpdateEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => UpdateSystemEventDataDto)
   data: UpdateSystemEventDataDto;
 }
 
-export class DeleteSystemEventDto extends GenericEventDto {
-  @Equals('DELETE')
-  op: 'DELETE';
-
+export class DeleteSystemEventDto extends GenericDeleteEventDto {
   @IsObject()
   @ValidateNested()
   @Type(() => DeleteSystemEventDataDto)
   data: DeleteSystemEventDataDto;
 }
 
-export class InsertSystemPayloadDto extends GenericPayloadDto {
+export class SystemPayloadDto extends GenericPayloadDto {
   @IsObject()
   @ValidateNested()
-  @Type(() => InsertSystemEventDto)
-  event: InsertSystemEventDto;
-}
-
-export class UpdateSystemPayloadDto extends GenericPayloadDto {
-  @IsObject()
-  @ValidateNested()
-  @Type(() => UpdateSystemEventDto)
-  event: UpdateSystemEventDto;
-}
-
-export class DeleteSystemPayloadDto extends GenericPayloadDto {
-  @IsObject()
-  @ValidateNested()
-  @Type(() => DeleteSystemEventDto)
-  event: DeleteSystemEventDto;
+  @Type(() => Object, {
+    keepDiscriminatorProperty: true,
+    discriminator: {
+      property: 'op',
+      subTypes: [
+        { value: InsertSystemEventDto, name: 'INSERT' },
+        { value: UpdateSystemEventDto, name: 'UPDATE' },
+        { value: DeleteSystemEventDto, name: 'DELETE' },
+      ],
+    },
+  })
+  event: InsertSystemEventDto | UpdateSystemEventDto | DeleteSystemEventDto;
 }
