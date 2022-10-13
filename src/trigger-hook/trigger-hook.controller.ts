@@ -150,7 +150,6 @@ export class TriggerHookController {
     }
 
     throw new HttpException('Invalid payload received', 400);
-
   }
 
   @Post('/system')
@@ -174,7 +173,6 @@ export class TriggerHookController {
     }
 
     throw new HttpException('Invalid payload received', 400);
-
   }
 
   @Post('/redshift_configuration')
@@ -204,6 +202,5 @@ export class TriggerHookController {
     }
 
     throw new HttpException('Invalid payload received', 400);
-
   }
 }
