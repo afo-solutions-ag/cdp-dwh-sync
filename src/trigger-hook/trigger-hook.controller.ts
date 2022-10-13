@@ -1,4 +1,11 @@
-import { Body, Controller, Get, HttpException, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpException,
+  Post,
+} from '@nestjs/common';
 import {
   UserPayloadDto,
   UnitUserPayloadDto,
@@ -32,6 +39,7 @@ export class TriggerHookController {
   }
 
   @Post('/user')
+  @HttpCode(200)
   async triggerHookUser(@Body() body: UserPayloadDto): Promise<Response> {
     if (body.event.op === 'INSERT') {
       await this.triggerHookService.createUser(body.event.data.new);
@@ -55,6 +63,7 @@ export class TriggerHookController {
   }
 
   @Post('/unit_user')
+  @HttpCode(200)
   async triggerHookUnitUser(
     @Body() body: UnitUserPayloadDto,
   ): Promise<Response> {
@@ -80,6 +89,7 @@ export class TriggerHookController {
   }
 
   @Post('/system_admin')
+  @HttpCode(200)
   async triggerHookSystemAdmin(
     @Body() body: SystemAdminPayloadDto,
   ): Promise<Response> {
@@ -105,6 +115,7 @@ export class TriggerHookController {
   }
 
   @Post('/global_admin')
+  @HttpCode(200)
   async triggerHookGlobalAdmin(
     @Body() body: GlobalAdminPayloadDto,
   ): Promise<Response> {
@@ -130,6 +141,7 @@ export class TriggerHookController {
   }
 
   @Post('/unit')
+  @HttpCode(200)
   async triggerHookUnit(@Body() body: UnitPayloadDto): Promise<Response> {
     if (body.event.op === 'INSERT') {
       await this.triggerHookService.createUnit(body.event.data.new);
@@ -153,6 +165,7 @@ export class TriggerHookController {
   }
 
   @Post('/system')
+  @HttpCode(200)
   async triggerHookSystem(@Body() body: SystemPayloadDto): Promise<Response> {
     if (body.event.op === 'INSERT') {
       await this.triggerHookService.createSystem(body.event.data.new);
@@ -176,6 +189,7 @@ export class TriggerHookController {
   }
 
   @Post('/redshift_configuration')
+  @HttpCode(200)
   async triggerHookRedshiftConfiguration(
     @Body() body: RedshiftConfigurationPayloadDto,
   ): Promise<Response> {

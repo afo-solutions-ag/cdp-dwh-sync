@@ -25,11 +25,11 @@ export class UserDto {
 
   @IsOptional()
   @IsString()
-  first_name: string;
+  first_name: string | null;
 
   @IsOptional()
   @IsString()
-  last_name: string;
+  last_name: string | null;
 }
 
 class InsertUserEventDataDto extends GenericInsertEventDataDto {
