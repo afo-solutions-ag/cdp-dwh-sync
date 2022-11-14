@@ -1,15 +1,21 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SNSModule } from '../sns/sns.module';
+import { SNSService } from '../sns/sns.sercive';
 import { GraphQLModule } from '../graphql/graphql.module';
 import { GraphQLService } from '../graphql/graphql.service';
-import { SQSModule } from '../sqs/sqs.module';
-import { SQSService } from '../sqs/sqs.service';
 import { TriggerHookController } from './trigger-hook.controller';
 import { TriggerHookService } from './trigger-hook.service';
 
 @Module({
-  imports: [SQSModule, GraphQLModule],
-  providers: [TriggerHookService, SQSService, GraphQLService, ConfigService],
+  imports: [GraphQLModule, SNSModule],
+  providers: [
+    TriggerHookService,
+    SNSService,
+    GraphQLService,
+    ConfigService,
+    SNSModule,
+  ],
   controllers: [TriggerHookController],
 })
 export class TriggerHookModule {}

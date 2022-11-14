@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { SNSService } from '../sns/sns.sercive';
 import { GraphQLService } from '../graphql/graphql.service';
-import { SQSService } from '../sqs/sqs.service';
 import {
   RedshiftConfigurationDto,
   SystemAdminDto,
@@ -56,7 +56,7 @@ const tidyUpRedshiftConfiguration = (
 @Injectable()
 export class TriggerHookService {
   constructor(
-    private readonly sqsService: SQSService,
+    private readonly snsService: SNSService,
     private readonly graphQLService: GraphQLService,
   ) {}
 
@@ -81,7 +81,7 @@ export class TriggerHookService {
 
     await Promise.all(
       systemIds.map(async (systemId) => {
-        await this.sqsService.sendMessage({ systemId }, 'USER');
+        await this.snsService.sendMessage({ systemId }, 'USER');
       }),
     );
   }
@@ -94,7 +94,7 @@ export class TriggerHookService {
 
     await Promise.all(
       systemIds.map(async (systemId) => {
-        await this.sqsService.sendMessage({ systemId }, 'USER');
+        await this.snsService.sendMessage({ systemId }, 'USER');
       }),
     );
   }
@@ -112,7 +112,7 @@ export class TriggerHookService {
     if (systemId === undefined) {
       throw new Error(`No system found for unit ${newUnitUser.unit_id}`);
     }
-    await this.sqsService.sendMessage({ systemId }, 'USER');
+    await this.snsService.sendMessage({ systemId }, 'USER');
   }
 
   async updateUnitUser(oldUnitUser: UnitUserDto, newUnitUser: UnitUserDto) {
@@ -135,9 +135,9 @@ export class TriggerHookService {
         `No system found for unit ${oldUnitUser.unit_id} or ${newUnitUser.unit_id}`,
       );
     }
-    await this.sqsService.sendMessage({ systemId: oldSystemId }, 'USER');
+    await this.snsService.sendMessage({ systemId: oldSystemId }, 'USER');
     if (oldSystemId !== newSystemId) {
-      await this.sqsService.sendMessage({ systemId: newSystemId }, 'USER');
+      await this.snsService.sendMessage({ systemId: newSystemId }, 'USER');
     }
   }
 
@@ -154,7 +154,7 @@ export class TriggerHookService {
     if (systemId === undefined) {
       throw new Error(`No system found for unit ${oldUnitUser.unit_id}`);
     }
-    await this.sqsService.sendMessage({ systemId }, 'USER');
+    await this.snsService.sendMessage({ systemId }, 'USER');
   }
 
   async createSystemAdmin(newSystemAdmin: SystemAdminDto) {
@@ -164,7 +164,7 @@ export class TriggerHookService {
       'Create system admin triggered with',
       JSON.stringify(newSystemAdmin, null, 2),
     );
-    await this.sqsService.sendMessage(
+    await this.snsService.sendMessage(
       { systemId: newSystemAdmin.system_id },
       'USER',
     );
@@ -181,12 +181,12 @@ export class TriggerHookService {
       JSON.stringify(oldSystemAdmin, null, 2),
       JSON.stringify(newSystemAdmin, null, 2),
     );
-    await this.sqsService.sendMessage(
+    await this.snsService.sendMessage(
       { systemId: oldSystemAdmin.system_id },
       'USER',
     );
     if (oldSystemAdmin.system_id !== newSystemAdmin.system_id) {
-      await this.sqsService.sendMessage(
+      await this.snsService.sendMessage(
         { systemId: newSystemAdmin.system_id },
         'USER',
       );
@@ -200,7 +200,7 @@ export class TriggerHookService {
       'Delete system admin triggered with',
       JSON.stringify(oldSystemAdmin, null, 2),
     );
-    await this.sqsService.sendMessage(
+    await this.snsService.sendMessage(
       { systemId: oldSystemAdmin.system_id },
       'USER',
     );
@@ -217,7 +217,7 @@ export class TriggerHookService {
 
     await Promise.all(
       systemIds.map(async (systemId) => {
-        await this.sqsService.sendMessage({ systemId }, 'USER');
+        await this.snsService.sendMessage({ systemId }, 'USER');
       }),
     );
   }
@@ -238,7 +238,7 @@ export class TriggerHookService {
 
     await Promise.all(
       systemIds.map(async (systemId) => {
-        await this.sqsService.sendMessage({ systemId }, 'USER');
+        await this.snsService.sendMessage({ systemId }, 'USER');
       }),
     );
   }
@@ -254,7 +254,7 @@ export class TriggerHookService {
 
     await Promise.all(
       systemIds.map(async (systemId) => {
-        await this.sqsService.sendMessage({ systemId }, 'USER');
+        await this.snsService.sendMessage({ systemId }, 'USER');
       }),
     );
   }
@@ -263,7 +263,7 @@ export class TriggerHookService {
     newUnit = tidyUpUnit(newUnit);
 
     console.log('Create unit triggered with', JSON.stringify(newUnit, null, 2));
-    await this.sqsService.sendMessage({ systemId: newUnit.system_id }, 'UNIT');
+    await this.snsService.sendMessage({ systemId: newUnit.system_id }, 'UNIT');
   }
 
   async updateUnit(oldUnit: UnitDto, newUnit: UnitDto) {
@@ -275,9 +275,9 @@ export class TriggerHookService {
       JSON.stringify(oldUnit, null, 2),
       JSON.stringify(newUnit, null, 2),
     );
-    await this.sqsService.sendMessage({ systemId: oldUnit.system_id }, 'UNIT');
+    await this.snsService.sendMessage({ systemId: oldUnit.system_id }, 'UNIT');
     if (oldUnit.system_id !== newUnit.system_id) {
-      await this.sqsService.sendMessage(
+      await this.snsService.sendMessage(
         { systemId: newUnit.system_id },
         'UNIT',
       );
@@ -288,7 +288,7 @@ export class TriggerHookService {
     oldUnit = tidyUpUnit(oldUnit);
 
     console.log('Delete unit triggered with', JSON.stringify(oldUnit, null, 2));
-    await this.sqsService.sendMessage({ systemId: oldUnit.system_id }, 'UNIT');
+    await this.snsService.sendMessage({ systemId: oldUnit.system_id }, 'UNIT');
   }
 
   async createSystem(newSystem: SystemDto) {
@@ -298,7 +298,7 @@ export class TriggerHookService {
       'Create system triggered with',
       JSON.stringify(newSystem, null, 2),
     );
-    await this.sqsService.sendMessage({ systemId: newSystem.id }, 'SYSTEM');
+    await this.snsService.sendMessage({ systemId: newSystem.id }, 'SYSTEM');
   }
 
   async updateSystem(oldSystem: SystemDto, newSystem: SystemDto) {
@@ -310,9 +310,9 @@ export class TriggerHookService {
       JSON.stringify(oldSystem, null, 2),
       JSON.stringify(newSystem, null, 2),
     );
-    await this.sqsService.sendMessage({ systemId: oldSystem.id }, 'SYSTEM');
+    await this.snsService.sendMessage({ systemId: oldSystem.id }, 'SYSTEM');
     if (oldSystem.id !== newSystem.id) {
-      await this.sqsService.sendMessage({ systemId: newSystem.id }, 'SYSTEM');
+      await this.snsService.sendMessage({ systemId: newSystem.id }, 'SYSTEM');
     }
   }
 
@@ -323,7 +323,7 @@ export class TriggerHookService {
       'Delete system triggered with',
       JSON.stringify(oldSystem, null, 2),
     );
-    await this.sqsService.sendMessage({ systemId: oldSystem.id }, 'SYSTEM');
+    await this.snsService.sendMessage({ systemId: oldSystem.id }, 'SYSTEM');
   }
 
   async createRedshiftConfiguration(
@@ -337,7 +337,7 @@ export class TriggerHookService {
       'Create redshift configuration triggered with',
       JSON.stringify(newRedshiftConfiguration, null, 2),
     );
-    await this.sqsService.sendMessage(
+    await this.snsService.sendMessage(
       { systemId: newRedshiftConfiguration.system_id },
       'REDSHIFT_CONFIGURATION',
     );
@@ -359,14 +359,14 @@ export class TriggerHookService {
       JSON.stringify(oldRedshiftConfiguration, null, 2),
       JSON.stringify(newRedshiftConfiguration, null, 2),
     );
-    await this.sqsService.sendMessage(
+    await this.snsService.sendMessage(
       { systemId: oldRedshiftConfiguration.system_id },
       'REDSHIFT_CONFIGURATION',
     );
     if (
       oldRedshiftConfiguration.system_id !== newRedshiftConfiguration.system_id
     ) {
-      await this.sqsService.sendMessage(
+      await this.snsService.sendMessage(
         { systemId: newRedshiftConfiguration.system_id },
         'REDSHIFT_CONFIGURATION',
       );
@@ -384,7 +384,7 @@ export class TriggerHookService {
       'Delete redshift configuration triggered with',
       JSON.stringify(oldRedshiftConfiguration, null, 2),
     );
-    await this.sqsService.sendMessage(
+    await this.snsService.sendMessage(
       { systemId: oldRedshiftConfiguration.system_id },
       'REDSHIFT_CONFIGURATION',
     );
