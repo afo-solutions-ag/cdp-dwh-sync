@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from './app.module';
 import { GraphQLService } from './graphql/graphql.service';
-import { SQSService } from './sqs/sqs.service';
+import { SNSService } from './sns/sns.sercive';
 import {
   getDeletePayload,
   getInsertPayload,
@@ -18,7 +18,7 @@ import { unitUser as mockedUnitUser } from './__mocks__/unit-user.dtos.mock';
 import { unit as mockedUnit } from './__mocks__/unit.dtos.mock';
 import { user as mockedUser } from './__mocks__/user.dtos.mock';
 
-const mockedSQSSendMessage: jest.Mock<ReturnType<SQSService['sendMessage']>> =
+const mockedSNSSendMessage: jest.Mock<ReturnType<SNSService['sendMessage']>> =
   jest.fn(() => Promise.resolve(true));
 
 const mockedGraphQLGetUserSystemIds: jest.Mock<
@@ -40,8 +40,8 @@ describe('App', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(SQSService)
-      .useValue({ sendMessage: mockedSQSSendMessage })
+      .overrideProvider(SNSService)
+      .useValue({ sendMessage: mockedSNSSendMessage })
       .overrideProvider(GraphQLService)
       .useValue({
         getUserSystemIds: mockedGraphQLGetUserSystemIds,
@@ -69,7 +69,7 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'user', action: 'insert' });
 
     expect(mockedGraphQLGetUserSystemIds).toHaveBeenCalledTimes(0);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(0);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(0);
   });
 
   it('/user (UPDATE)', async () => {
@@ -83,7 +83,7 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'user', action: 'update' });
 
     expect(mockedGraphQLGetUserSystemIds).toHaveBeenCalledTimes(2);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedGraphQLGetUserSystemIds).toHaveBeenNthCalledWith(
       1,
@@ -94,7 +94,7 @@ describe('App', () => {
       mockedUser.id,
     );
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'USER',
     );
@@ -111,9 +111,9 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'user', action: 'delete' });
 
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledTimes(1);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'USER',
     );
@@ -130,9 +130,9 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'unit', action: 'insert' });
 
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledTimes(0);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedUnit.system_id },
       'UNIT',
     );
@@ -149,9 +149,9 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'unit', action: 'update' });
 
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledTimes(0);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedUnit.system_id },
       'UNIT',
     );
@@ -168,9 +168,9 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'unit', action: 'delete' });
 
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledTimes(0);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedUnit.system_id },
       'UNIT',
     );
@@ -187,12 +187,12 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'unit_user', action: 'insert' });
 
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledTimes(1);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledWith(
       mockedUnitUser.unit_id,
     );
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'USER',
     );
@@ -209,7 +209,7 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'unit_user', action: 'update' });
 
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledTimes(2);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenNthCalledWith(
       1,
@@ -219,7 +219,7 @@ describe('App', () => {
       2,
       mockedUnitUser.unit_id,
     );
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'USER',
     );
@@ -236,12 +236,12 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'unit_user', action: 'delete' });
 
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledTimes(1);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledWith(
       mockedUnitUser.unit_id,
     );
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'USER',
     );
@@ -257,9 +257,9 @@ describe('App', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ entity: 'system_admin', action: 'insert' });
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystemAdmin.system_id },
       'USER',
     );
@@ -275,9 +275,9 @@ describe('App', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ entity: 'system_admin', action: 'update' });
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystemAdmin.system_id },
       'USER',
     );
@@ -293,9 +293,9 @@ describe('App', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ entity: 'system_admin', action: 'delete' });
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystemAdmin.system_id },
       'USER',
     );
@@ -312,10 +312,10 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'global_admin', action: 'insert' });
 
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledTimes(1);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledWith();
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'USER',
     );
@@ -332,10 +332,10 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'global_admin', action: 'update' });
 
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledTimes(1);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledWith();
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'USER',
     );
@@ -352,10 +352,10 @@ describe('App', () => {
     expect(response.body).toEqual({ entity: 'global_admin', action: 'delete' });
 
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledTimes(1);
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledWith();
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'USER',
     );
@@ -371,9 +371,9 @@ describe('App', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ entity: 'system', action: 'insert' });
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'SYSTEM',
     );
@@ -389,9 +389,9 @@ describe('App', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ entity: 'system', action: 'update' });
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'SYSTEM',
     );
@@ -407,9 +407,9 @@ describe('App', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ entity: 'system', action: 'delete' });
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedSystem.id },
       'SYSTEM',
     );
@@ -428,9 +428,9 @@ describe('App', () => {
       action: 'insert',
     });
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedRedshiftConfiguration.system_id },
       'REDSHIFT_CONFIGURATION',
     );
@@ -452,9 +452,9 @@ describe('App', () => {
       action: 'update',
     });
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedRedshiftConfiguration.system_id },
       'REDSHIFT_CONFIGURATION',
     );
@@ -473,9 +473,9 @@ describe('App', () => {
       action: 'delete',
     });
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSQSSendMessage).toHaveBeenCalledWith(
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
       { systemId: mockedRedshiftConfiguration.system_id },
       'REDSHIFT_CONFIGURATION',
     );
