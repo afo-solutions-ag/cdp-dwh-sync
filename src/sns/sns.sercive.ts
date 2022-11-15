@@ -13,7 +13,7 @@ export class SNSService {
   topicArn: string;
 
   constructor(configService: ConfigService<SNSConfig>) {
-    const topicARN = configService.getOrThrow<string>('TOPIC_ARN');
+    const topicARN = configService.getOrThrow<string>('SNS_TOPIC_ARN');
 
     // const [, , service, region, accountId, topicName] = topicARN.split(':');
 
