@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SNSService } from '../sns/sns.sercive';
+import { SNSService } from '../sns/sns.service';
 import { GraphQLService } from '../graphql/graphql.service';
 import {
   RedshiftConfigurationDto,

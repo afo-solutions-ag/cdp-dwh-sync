@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from './app.module';
 import { GraphQLService } from './graphql/graphql.service';
-import { SNSService } from './sns/sns.sercive';
+import { SNSService } from './sns/sns.service';
 import {
   getDeletePayload,
   getInsertPayload,
