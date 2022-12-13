@@ -95,9 +95,11 @@ describe('App', () => {
     );
 
     expect(mockedSNSSendMessage).toHaveBeenCalledWith({
-      systemId: mockedSystem.id,
-      type: 'USER',
-      data: {},
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
     });
   });
 
@@ -115,9 +117,11 @@ describe('App', () => {
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedSNSSendMessage).toHaveBeenCalledWith({
-      systemId: mockedSystem.id,
-      type: 'USER',
-      data: {},
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
     });
   });
 
@@ -135,9 +139,11 @@ describe('App', () => {
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedSNSSendMessage).toHaveBeenCalledWith({
-      systemId: mockedSystem.id,
-      type: 'UNIT',
-      data: {},
+      system_id: mockedUnit.system_id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'UNIT',
+      },
     });
   });
 
@@ -155,9 +161,11 @@ describe('App', () => {
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedSNSSendMessage).toHaveBeenCalledWith({
-      systemId: mockedSystem.id,
-      type: 'UNIT',
-      data: {},
+      system_id: mockedUnit.system_id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'UNIT',
+      },
     });
   });
 
@@ -175,9 +183,11 @@ describe('App', () => {
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedSNSSendMessage).toHaveBeenCalledWith({
-      systemId: mockedSystem.id,
-      type: 'UNIT',
-      data: {},
+      system_id: mockedUnit.system_id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'UNIT',
+      },
     });
   });
 
@@ -198,9 +208,11 @@ describe('App', () => {
       mockedUnitUser.unit_id,
     );
     expect(mockedSNSSendMessage).toHaveBeenCalledWith({
-      systemId: mockedSystem.id,
-      type: 'UNIT',
-      data: {},
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
     });
   });
 
@@ -226,9 +238,11 @@ describe('App', () => {
       mockedUnitUser.unit_id,
     );
     expect(mockedSNSSendMessage).toHaveBeenCalledWith({
-      systemId: mockedSystem.id,
-      type: 'USER',
-      data: {},
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
     });
   });
 
@@ -249,9 +263,11 @@ describe('App', () => {
       mockedUnitUser.unit_id,
     );
     expect(mockedSNSSendMessage).toHaveBeenCalledWith({
-      systemId: mockedSystem.id,
-      type: 'USER',
-      data: {},
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
     });
   });
 
@@ -267,10 +283,13 @@ describe('App', () => {
 
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystemAdmin.system_id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedSystemAdmin.system_id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
+    });
   });
 
   it('/system_admin (UPDATE)', async () => {
@@ -285,10 +304,13 @@ describe('App', () => {
 
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystemAdmin.system_id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedSystemAdmin.system_id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
+    });
   });
 
   it('/system_admin (DELETE)', async () => {
@@ -303,10 +325,13 @@ describe('App', () => {
 
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystemAdmin.system_id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedSystemAdmin.system_id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
+    });
   });
 
   it('/global_admin', async () => {
@@ -323,10 +348,13 @@ describe('App', () => {
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledWith();
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
+    });
   });
 
   it('/global_admin (UPDATE)', async () => {
@@ -343,10 +371,13 @@ describe('App', () => {
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledWith();
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
+    });
   });
 
   it('/global_admin (DELETE)', async () => {
@@ -363,10 +394,13 @@ describe('App', () => {
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledWith();
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'USER',
+      },
+    });
   });
 
   it('/system (CREATE)', async () => {
@@ -381,10 +415,13 @@ describe('App', () => {
 
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'SYSTEM',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'SYSTEM',
+      },
+    });
   });
 
   it('/system (UPDATE)', async () => {
@@ -399,10 +436,13 @@ describe('App', () => {
 
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'SYSTEM',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'SYSTEM',
+      },
+    });
   });
 
   it('/system (DELETE)', async () => {
@@ -417,10 +457,13 @@ describe('App', () => {
 
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'SYSTEM',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedSystem.id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'SYSTEM',
+      },
+    });
   });
 
   it('/redshift_configuration', async () => {
@@ -438,10 +481,13 @@ describe('App', () => {
 
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedRedshiftConfiguration.system_id },
-      'REDSHIFT_CONFIGURATION',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedRedshiftConfiguration.system_id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'REDSHIFT_CONFIGURATION',
+      },
+    });
   });
 
   it('/redshift_configuration (UPDATE)', async () => {
@@ -462,10 +508,13 @@ describe('App', () => {
 
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedRedshiftConfiguration.system_id },
-      'REDSHIFT_CONFIGURATION',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedRedshiftConfiguration.system_id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'REDSHIFT_CONFIGURATION',
+      },
+    });
   });
 
   it('/redshift_configuration (DELETE)', async () => {
@@ -483,9 +532,12 @@ describe('App', () => {
 
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedRedshiftConfiguration.system_id },
-      'REDSHIFT_CONFIGURATION',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      system_id: mockedRedshiftConfiguration.system_id,
+      type: 'SYNC',
+      data: {
+        entity_type: 'REDSHIFT_CONFIGURATION',
+      },
+    });
   });
 });
