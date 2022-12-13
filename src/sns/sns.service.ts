@@ -3,35 +3,34 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SNSConfig } from './sns.config';
 
-type Entity = 'USER' | 'UNIT' | 'SYSTEM' | 'REDSHIFT_CONFIGURATION';
-type MessageBody = { systemId: string };
+export type GenericMessage<
+  T extends string = string,
+  D extends object = object,
+> = {
+  type: T;
+  system_id: string;
+  data: D;
+};
 
 @Injectable()
 export class SNSService {
   client: SNSClient;
-  //   topicUrl: string;
   topicArn: string;
 
   constructor(configService: ConfigService<SNSConfig>) {
     const topicARN = configService.getOrThrow<string>('SNS_TOPIC_ARN');
 
-    // const [, , service, region, accountId, topicName] = topicARN.split(':');
-
     this.topicArn = topicARN;
-    // this.topicUrl = `https://${service}.${region}.amazonaws.com/${accountId}/${topicName}`;
     this.client = new SNSClient({});
   }
 
-  async sendMessage(message: MessageBody, entity: Entity) {
+  async sendMessage(message: GenericMessage) {
     const messageJson = JSON.stringify(message);
 
     try {
       const output = await this.client.send(
         new PublishCommand({
           Message: messageJson,
-          MessageAttributes: {
-            Entity: { DataType: 'String', StringValue: entity },
-          },
           TopicArn: this.topicArn,
         }),
       );

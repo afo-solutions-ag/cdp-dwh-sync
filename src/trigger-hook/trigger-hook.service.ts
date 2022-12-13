@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SNSService } from '../sns/sns.service';
+import { GenericMessage, SNSService } from '../sns/sns.service';
 import { GraphQLService } from '../graphql/graphql.service';
 import {
   RedshiftConfigurationDto,
@@ -10,6 +10,10 @@ import {
   UserDto,
 } from './trigger-hook.dtos';
 import { GlobalAdminDto } from './trigger-hook.dtos/global-admin.dtos';
+
+type Entity = 'USER' | 'UNIT' | 'SYSTEM' | 'REDSHIFT_CONFIGURATION';
+
+type SyncMessage = GenericMessage<'SYNC', { entity_type: Entity }>;
 
 const tidyUpUser = (user: UserDto): UserDto => ({
   id: user.id,
@@ -81,7 +85,14 @@ export class TriggerHookService {
 
     await Promise.all(
       systemIds.map(async (systemId) => {
-        await this.snsService.sendMessage({ systemId }, 'USER');
+        const message: SyncMessage = {
+          type: 'SYNC',
+          system_id: systemId,
+          data: {
+            entity_type: 'USER',
+          },
+        };
+        await this.snsService.sendMessage(message);
       }),
     );
   }
@@ -94,7 +105,14 @@ export class TriggerHookService {
 
     await Promise.all(
       systemIds.map(async (systemId) => {
-        await this.snsService.sendMessage({ systemId }, 'USER');
+        const message: SyncMessage = {
+          type: 'SYNC',
+          system_id: systemId,
+          data: {
+            entity_type: 'USER',
+          },
+        };
+        await this.snsService.sendMessage(message);
       }),
     );
   }
@@ -112,7 +130,14 @@ export class TriggerHookService {
     if (systemId === undefined) {
       throw new Error(`No system found for unit ${newUnitUser.unit_id}`);
     }
-    await this.snsService.sendMessage({ systemId }, 'USER');
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: systemId,
+      data: {
+        entity_type: 'USER',
+      },
+    };
+    await this.snsService.sendMessage(message);
   }
 
   async updateUnitUser(oldUnitUser: UnitUserDto, newUnitUser: UnitUserDto) {
@@ -135,9 +160,23 @@ export class TriggerHookService {
         `No system found for unit ${oldUnitUser.unit_id} or ${newUnitUser.unit_id}`,
       );
     }
-    await this.snsService.sendMessage({ systemId: oldSystemId }, 'USER');
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: oldSystemId,
+      data: {
+        entity_type: 'USER',
+      },
+    };
+    await this.snsService.sendMessage(message);
     if (oldSystemId !== newSystemId) {
-      await this.snsService.sendMessage({ systemId: newSystemId }, 'USER');
+      const message: SyncMessage = {
+        type: 'SYNC',
+        system_id: newSystemId,
+        data: {
+          entity_type: 'USER',
+        },
+      };
+      await this.snsService.sendMessage(message);
     }
   }
 
@@ -154,7 +193,14 @@ export class TriggerHookService {
     if (systemId === undefined) {
       throw new Error(`No system found for unit ${oldUnitUser.unit_id}`);
     }
-    await this.snsService.sendMessage({ systemId }, 'USER');
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: systemId,
+      data: {
+        entity_type: 'USER',
+      },
+    };
+    await this.snsService.sendMessage(message);
   }
 
   async createSystemAdmin(newSystemAdmin: SystemAdminDto) {
@@ -164,10 +210,14 @@ export class TriggerHookService {
       'Create system admin triggered with',
       JSON.stringify(newSystemAdmin, null, 2),
     );
-    await this.snsService.sendMessage(
-      { systemId: newSystemAdmin.system_id },
-      'USER',
-    );
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: newSystemAdmin.system_id,
+      data: {
+        entity_type: 'USER',
+      },
+    };
+    await this.snsService.sendMessage(message);
   }
 
   async updateSystemAdmin(
@@ -181,15 +231,23 @@ export class TriggerHookService {
       JSON.stringify(oldSystemAdmin, null, 2),
       JSON.stringify(newSystemAdmin, null, 2),
     );
-    await this.snsService.sendMessage(
-      { systemId: oldSystemAdmin.system_id },
-      'USER',
-    );
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: newSystemAdmin.system_id,
+      data: {
+        entity_type: 'USER',
+      },
+    };
+    await this.snsService.sendMessage(message);
     if (oldSystemAdmin.system_id !== newSystemAdmin.system_id) {
-      await this.snsService.sendMessage(
-        { systemId: newSystemAdmin.system_id },
-        'USER',
-      );
+      const message: SyncMessage = {
+        type: 'SYNC',
+        system_id: oldSystemAdmin.system_id,
+        data: {
+          entity_type: 'USER',
+        },
+      };
+      await this.snsService.sendMessage(message);
     }
   }
 
@@ -200,10 +258,14 @@ export class TriggerHookService {
       'Delete system admin triggered with',
       JSON.stringify(oldSystemAdmin, null, 2),
     );
-    await this.snsService.sendMessage(
-      { systemId: oldSystemAdmin.system_id },
-      'USER',
-    );
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: oldSystemAdmin.system_id,
+      data: {
+        entity_type: 'USER',
+      },
+    };
+    await this.snsService.sendMessage(message);
   }
 
   async createGlobalAdmin(newGlobalAdmin: GlobalAdminDto) {
@@ -217,7 +279,14 @@ export class TriggerHookService {
 
     await Promise.all(
       systemIds.map(async (systemId) => {
-        await this.snsService.sendMessage({ systemId }, 'USER');
+        const message: SyncMessage = {
+          type: 'SYNC',
+          system_id: systemId,
+          data: {
+            entity_type: 'USER',
+          },
+        };
+        await this.snsService.sendMessage(message);
       }),
     );
   }
@@ -238,7 +307,14 @@ export class TriggerHookService {
 
     await Promise.all(
       systemIds.map(async (systemId) => {
-        await this.snsService.sendMessage({ systemId }, 'USER');
+        const message: SyncMessage = {
+          type: 'SYNC',
+          system_id: systemId,
+          data: {
+            entity_type: 'USER',
+          },
+        };
+        await this.snsService.sendMessage(message);
       }),
     );
   }
@@ -254,7 +330,14 @@ export class TriggerHookService {
 
     await Promise.all(
       systemIds.map(async (systemId) => {
-        await this.snsService.sendMessage({ systemId }, 'USER');
+        const message: SyncMessage = {
+          type: 'SYNC',
+          system_id: systemId,
+          data: {
+            entity_type: 'USER',
+          },
+        };
+        await this.snsService.sendMessage(message);
       }),
     );
   }
@@ -263,7 +346,14 @@ export class TriggerHookService {
     newUnit = tidyUpUnit(newUnit);
 
     console.log('Create unit triggered with', JSON.stringify(newUnit, null, 2));
-    await this.snsService.sendMessage({ systemId: newUnit.system_id }, 'UNIT');
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: newUnit.system_id,
+      data: {
+        entity_type: 'UNIT',
+      },
+    };
+    await this.snsService.sendMessage(message);
   }
 
   async updateUnit(oldUnit: UnitDto, newUnit: UnitDto) {
@@ -275,12 +365,23 @@ export class TriggerHookService {
       JSON.stringify(oldUnit, null, 2),
       JSON.stringify(newUnit, null, 2),
     );
-    await this.snsService.sendMessage({ systemId: oldUnit.system_id }, 'UNIT');
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: oldUnit.system_id,
+      data: {
+        entity_type: 'UNIT',
+      },
+    };
+    await this.snsService.sendMessage(message);
     if (oldUnit.system_id !== newUnit.system_id) {
-      await this.snsService.sendMessage(
-        { systemId: newUnit.system_id },
-        'UNIT',
-      );
+      const message: SyncMessage = {
+        type: 'SYNC',
+        system_id: newUnit.system_id,
+        data: {
+          entity_type: 'UNIT',
+        },
+      };
+      await this.snsService.sendMessage(message);
     }
   }
 
@@ -288,7 +389,14 @@ export class TriggerHookService {
     oldUnit = tidyUpUnit(oldUnit);
 
     console.log('Delete unit triggered with', JSON.stringify(oldUnit, null, 2));
-    await this.snsService.sendMessage({ systemId: oldUnit.system_id }, 'UNIT');
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: oldUnit.system_id,
+      data: {
+        entity_type: 'UNIT',
+      },
+    };
+    await this.snsService.sendMessage(message);
   }
 
   async createSystem(newSystem: SystemDto) {
@@ -298,7 +406,14 @@ export class TriggerHookService {
       'Create system triggered with',
       JSON.stringify(newSystem, null, 2),
     );
-    await this.snsService.sendMessage({ systemId: newSystem.id }, 'SYSTEM');
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: newSystem.id,
+      data: {
+        entity_type: 'SYSTEM',
+      },
+    };
+    await this.snsService.sendMessage(message);
   }
 
   async updateSystem(oldSystem: SystemDto, newSystem: SystemDto) {
@@ -310,9 +425,23 @@ export class TriggerHookService {
       JSON.stringify(oldSystem, null, 2),
       JSON.stringify(newSystem, null, 2),
     );
-    await this.snsService.sendMessage({ systemId: oldSystem.id }, 'SYSTEM');
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: oldSystem.id,
+      data: {
+        entity_type: 'SYSTEM',
+      },
+    };
+    await this.snsService.sendMessage(message);
     if (oldSystem.id !== newSystem.id) {
-      await this.snsService.sendMessage({ systemId: newSystem.id }, 'SYSTEM');
+      const message: SyncMessage = {
+        type: 'SYNC',
+        system_id: newSystem.id,
+        data: {
+          entity_type: 'SYSTEM',
+        },
+      };
+      await this.snsService.sendMessage(message);
     }
   }
 
@@ -323,7 +452,14 @@ export class TriggerHookService {
       'Delete system triggered with',
       JSON.stringify(oldSystem, null, 2),
     );
-    await this.snsService.sendMessage({ systemId: oldSystem.id }, 'SYSTEM');
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: oldSystem.id,
+      data: {
+        entity_type: 'SYSTEM',
+      },
+    };
+    await this.snsService.sendMessage(message);
   }
 
   async createRedshiftConfiguration(
@@ -337,10 +473,14 @@ export class TriggerHookService {
       'Create redshift configuration triggered with',
       JSON.stringify(newRedshiftConfiguration, null, 2),
     );
-    await this.snsService.sendMessage(
-      { systemId: newRedshiftConfiguration.system_id },
-      'REDSHIFT_CONFIGURATION',
-    );
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: newRedshiftConfiguration.system_id,
+      data: {
+        entity_type: 'REDSHIFT_CONFIGURATION',
+      },
+    };
+    await this.snsService.sendMessage(message);
   }
 
   async updateRedshiftConfiguration(
@@ -359,17 +499,25 @@ export class TriggerHookService {
       JSON.stringify(oldRedshiftConfiguration, null, 2),
       JSON.stringify(newRedshiftConfiguration, null, 2),
     );
-    await this.snsService.sendMessage(
-      { systemId: oldRedshiftConfiguration.system_id },
-      'REDSHIFT_CONFIGURATION',
-    );
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: oldRedshiftConfiguration.system_id,
+      data: {
+        entity_type: 'REDSHIFT_CONFIGURATION',
+      },
+    };
+    await this.snsService.sendMessage(message);
     if (
       oldRedshiftConfiguration.system_id !== newRedshiftConfiguration.system_id
     ) {
-      await this.snsService.sendMessage(
-        { systemId: newRedshiftConfiguration.system_id },
-        'REDSHIFT_CONFIGURATION',
-      );
+      const message: SyncMessage = {
+        type: 'SYNC',
+        system_id: newRedshiftConfiguration.system_id,
+        data: {
+          entity_type: 'REDSHIFT_CONFIGURATION',
+        },
+      };
+      await this.snsService.sendMessage(message);
     }
   }
 
@@ -384,9 +532,13 @@ export class TriggerHookService {
       'Delete redshift configuration triggered with',
       JSON.stringify(oldRedshiftConfiguration, null, 2),
     );
-    await this.snsService.sendMessage(
-      { systemId: oldRedshiftConfiguration.system_id },
-      'REDSHIFT_CONFIGURATION',
-    );
+    const message: SyncMessage = {
+      type: 'SYNC',
+      system_id: oldRedshiftConfiguration.system_id,
+      data: {
+        entity_type: 'REDSHIFT_CONFIGURATION',
+      },
+    };
+    await this.snsService.sendMessage(message);
   }
 }

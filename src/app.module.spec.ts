@@ -94,10 +94,11 @@ describe('App', () => {
       mockedUser.id,
     );
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      systemId: mockedSystem.id,
+      type: 'USER',
+      data: {},
+    });
   });
 
   it('/user (DELETE)', async () => {
@@ -113,10 +114,11 @@ describe('App', () => {
     expect(mockedGraphQLGetSystemIds).toHaveBeenCalledTimes(1);
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      systemId: mockedSystem.id,
+      type: 'USER',
+      data: {},
+    });
   });
 
   it('/unit (CREATE)', async () => {
@@ -132,10 +134,11 @@ describe('App', () => {
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledTimes(0);
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedUnit.system_id },
-      'UNIT',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      systemId: mockedSystem.id,
+      type: 'UNIT',
+      data: {},
+    });
   });
 
   it('/unit (UPDATE)', async () => {
@@ -151,10 +154,11 @@ describe('App', () => {
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledTimes(0);
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedUnit.system_id },
-      'UNIT',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      systemId: mockedSystem.id,
+      type: 'UNIT',
+      data: {},
+    });
   });
 
   it('/unit (DELETE)', async () => {
@@ -170,10 +174,11 @@ describe('App', () => {
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledTimes(0);
     expect(mockedSNSSendMessage).toHaveBeenCalledTimes(1);
 
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedUnit.system_id },
-      'UNIT',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      systemId: mockedSystem.id,
+      type: 'UNIT',
+      data: {},
+    });
   });
 
   it('/unit_user (CREATE)', async () => {
@@ -192,10 +197,11 @@ describe('App', () => {
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledWith(
       mockedUnitUser.unit_id,
     );
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      systemId: mockedSystem.id,
+      type: 'UNIT',
+      data: {},
+    });
   });
 
   it('/unit_user (UPDATE)', async () => {
@@ -219,10 +225,11 @@ describe('App', () => {
       2,
       mockedUnitUser.unit_id,
     );
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      systemId: mockedSystem.id,
+      type: 'USER',
+      data: {},
+    });
   });
 
   it('/unit_user (DELETE)', async () => {
@@ -241,10 +248,11 @@ describe('App', () => {
     expect(mockedGraphQLGetUnitSystemId).toHaveBeenCalledWith(
       mockedUnitUser.unit_id,
     );
-    expect(mockedSNSSendMessage).toHaveBeenCalledWith(
-      { systemId: mockedSystem.id },
-      'USER',
-    );
+    expect(mockedSNSSendMessage).toHaveBeenCalledWith({
+      systemId: mockedSystem.id,
+      type: 'USER',
+      data: {},
+    });
   });
 
   it('/system_admin (CREATE)', async () => {
